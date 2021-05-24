@@ -7,4 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Added:
+- Holder (as part of [EXT-1](https://github.com/isnullxbh/ext/issues/1))
+- Result ([EXT-1](https://github.com/isnullxbh/ext/issues/1))
+
 [Unreleased]: https://github.com/isnullxbh/ext/compare/master...dev
