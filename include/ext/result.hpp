@@ -7,7 +7,9 @@
 #ifndef EXT_RESULT_HPP
 #define EXT_RESULT_HPP
 
+#include <exception>
 #include <variant>
+#include <functional>
 
 #include <ext/holder.hpp>
 
