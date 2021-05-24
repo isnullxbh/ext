@@ -23,7 +23,9 @@ target_include_directories(${EXT_TESTS} PRIVATE
     ${CONAN_INCLUDE_DIRS})
 
 target_sources(${EXT_TESTS} PRIVATE
-    main.cpp)
+    main.cpp
+    holder.tests.cpp
+    result.tests.cpp)
 
 target_link_directories(${EXT_TESTS} PRIVATE
     ${CONAN_LIB_DIRS})
