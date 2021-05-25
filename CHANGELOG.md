@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add bind operator for the Result type: >>= ([EXT-5](https://github.com/isnullxbh/ext/issues/5))
+- Define map operator for the Result type: | ([EXT-6](https://github.com/isnullxbh/ext/issues/6))
 
 ## [0.1.2] - 2021-05-25
 

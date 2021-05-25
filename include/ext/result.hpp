@@ -48,6 +48,24 @@ template<typename T, typename E, typename Function>
 constexpr auto operator>>=(const Result<T, E>& result, Function&& fn) -> decltype(auto);
 
 /**
+ * @brief   Applies the given function to the result value.
+ *
+ * @tparam  T         Result value type.
+ * @tparam  E         Result error type.
+ * @tparam  Function  Function type.
+ * @param   result    A reference to the result.
+ * @param   function  Function.
+ *
+ * @return  If the result is success - a new result containing the value which is result
+ *          of application the given function to the result value, otherwise - new result
+ *          containing error value copied from the original result.
+ */
+
+template<typename T, typename E, typename Function>
+    requires std::is_invocable_v<Function, const T&>
+constexpr auto operator|(const Result<T, E>& result, Function&& function) -> decltype(auto);
+
+/**
  * @brief   Compares two results for equality.
  *
  * @tparam  T    Value type.
@@ -465,6 +483,13 @@ requires std::is_invocable_v<Function, const T&>
 constexpr auto operator>>=(const Result<T, E>& result, Function&& fn) -> decltype(auto)
 {
     return result.bind(std::forward<Function>(fn));
+}
+
+template<typename T, typename E, typename Function>
+requires std::is_invocable_v<Function, const T&>
+constexpr auto operator|(const Result<T, E>& result, Function&& function) -> decltype(auto)
+{
+    return result.map(std::forward<Function>(function));
 }
 
 template<typename T, typename E>
