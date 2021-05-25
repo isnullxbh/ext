@@ -18,6 +18,35 @@ namespace ext {
 template<typename T, typename E>
 class Result;
 
+namespace traits {
+
+template<typename T>
+struct IsResult : std::false_type {};
+
+template<typename T, typename E>
+struct IsResult<Result<T, E>> : std::true_type {};
+
+} // namespace traits
+
+/**
+ * @brief   Binds the given function to the result.
+ *
+ * @tparam  T         Result value type.
+ * @tparam  E         Result error type.
+ * @tparam  Function  Function type.
+ * @param   result    Result.
+ * @param   fn        Function.
+ *
+ * @return  If the result is success - a new result containing the value which is result
+ *          of application the given function to the result value, otherwise - new result
+ *          containing error value copied from the original result.
+ */
+
+template<typename T, typename E, typename Function>
+    requires std::is_invocable_v<Function, const T&>
+          && traits::IsResult<std::invoke_result_t<Function, const T&>>::value
+constexpr auto operator>>=(const Result<T, E>& result, Function&& fn) -> decltype(auto);
+
 /**
  * @brief   Compares two results for equality.
  *
@@ -428,6 +457,14 @@ constexpr auto Result<T, E>::mutate(Mutator&& mutator) -> Result&
         std::invoke(std::forward<Mutator>(mutator), value());
     }
     return *this;
+}
+
+template<typename T, typename E, typename Function>
+requires std::is_invocable_v<Function, const T&>
+         && traits::IsResult<std::invoke_result_t<Function, const T&>>::value
+constexpr auto operator>>=(const Result<T, E>& result, Function&& fn) -> decltype(auto)
+{
+    return result.bind(std::forward<Function>(fn));
 }
 
 template<typename T, typename E>

@@ -7,15 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add bind operator for the Result type: >>= ([EXT-5](https://github.com/isnullxbh/ext/issues/5))
+
 ## [0.1.2] - 2021-05-25
 
-Changed:
+### Changed:
 
 - Add missing headers
 
 ## [0.1.1] - 2021-05-24
 
-Added:
+### Added:
 
 - Holder (as part of [EXT-1](https://github.com/isnullxbh/ext/issues/1))
 - Result ([EXT-1](https://github.com/isnullxbh/ext/issues/1))
