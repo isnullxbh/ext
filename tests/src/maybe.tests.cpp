@@ -676,3 +676,63 @@ TEST(MaybeTests, Comparison)
         ASSERT_EQ(m1, value);
     }
 }
+
+TEST(MaybeTests, BindOperator)
+{
+    auto fn = [](const std::string& str) -> Maybe<std::size_t>
+        {
+            return Maybe<std::size_t>(str.size());
+        };
+
+    {
+        std::string str { "xyz" };
+
+        Maybe<std::string> m1 { str };
+        const auto m2 = m1 >>= fn;
+        ASSERT_TRUE(m2.isSome());
+        ASSERT_EQ(m2.value(), 3U);
+
+        Maybe<std::string> m3;
+        const auto m4 = m3 >>= fn;
+        ASSERT_TRUE(m4.isNone());
+    }
+
+    {
+        std::string str { "xyz" };
+
+        Maybe<const std::string> m1 { str };
+        const auto m2 = m1 >>= fn;
+        ASSERT_TRUE(m2.isSome());
+        ASSERT_EQ(m2.value(), 3U);
+
+        Maybe<const std::string> m3;
+        const auto m4 = m3 >>= fn;
+        ASSERT_TRUE(m4.isNone());
+    }
+
+    {
+        std::string str { "xyz" };
+
+        Maybe<std::string&> m1 { str };
+        const auto m2 = m1 >>= fn;
+        ASSERT_TRUE(m2.isSome());
+        ASSERT_EQ(m2.value(), 3U);
+
+        Maybe<std::string&> m3;
+        const auto m4 = m3 >>= fn;
+        ASSERT_TRUE(m4.isNone());
+    }
+
+    {
+        std::string str { "xyz" };
+
+        Maybe<const std::string&> m1 { str };
+        const auto m2 = m1 >>= fn;
+        ASSERT_TRUE(m2.isSome());
+        ASSERT_EQ(m2.value(), 3U);
+
+        Maybe<const std::string&> m3;
+        const auto m4 = m3 >>= fn;
+        ASSERT_TRUE(m4.isNone());
+    }
+}

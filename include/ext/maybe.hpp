@@ -21,6 +21,37 @@ namespace ext {
 template<typename T>
 class Maybe;
 
+namespace traits {
+
+template<typename T>
+struct IsMaybe : std::false_type {};
+
+template<typename T>
+struct IsMaybe<Maybe<T>> : std::true_type {};
+
+} // namespace traits
+
+/**
+ * @brief   Applies the given function to the maybe value.
+ *
+ * @tparam  T         Maybe value type.
+ * @tparam  Function  Function type.
+ * @param   maybe     A reference to the maybe.
+ * @param   function  Function.
+ *
+ * @return  If the maybe has a value - result of applying the given function to the value of maybe,
+ *          otherwise - empty maybe.
+ *
+ * @throw   Any exception thrown by the given function.
+ *
+ * @since   0.1.3
+ */
+
+template<typename T, typename Function>
+    requires std::is_invocable_v<Function, const T&>
+          && traits::IsMaybe<std::invoke_result_t<Function, const T&>>::value
+constexpr auto operator>>=(const Maybe<T>& maybe, Function&& function) -> std::invoke_result_t<Function, const T&>;
+
 /**
  * @brief   Compares two maybe for equality.
  *
@@ -70,16 +101,6 @@ constexpr auto operator==(const Maybe<T>& lhs, const None&) noexcept -> bool;
 
 template<typename T, typename U>
 constexpr auto operator==(const Maybe<T>& lhs, const U& rhs) -> bool;
-
-namespace traits {
-
-template<typename T>
-struct IsMaybe : std::false_type {};
-
-template<typename T>
-struct IsMaybe<Maybe<T>> : std::true_type {};
-
-} // namespace traits
 
 /**
  * @class   Maybe
@@ -687,6 +708,14 @@ constexpr auto Maybe<T&>::mutate(Mutator&& mutator) -> Maybe&
     }
 
     return *this;
+}
+
+template<typename T, typename Function>
+requires std::is_invocable_v<Function, const T&>
+         && traits::IsMaybe<std::invoke_result_t<Function, const T&>>::value
+constexpr auto operator>>=(const Maybe<T>& maybe, Function&& function) -> std::invoke_result_t<Function, const T&>
+{
+    return maybe.bind(std::move(function));
 }
 
 template<typename T>
