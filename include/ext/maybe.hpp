@@ -735,7 +735,7 @@ requires std::is_invocable_v<Function, const T&>
          && traits::IsMaybe<std::invoke_result_t<Function, const T&>>::value
 constexpr auto operator>>=(const Maybe<T>& maybe, Function&& function) -> std::invoke_result_t<Function, const T&>
 {
-    return maybe.bind(std::move(function));
+    return maybe.bind(std::forward<Function>(function));
 }
 
 template<typename T, typename Function>
