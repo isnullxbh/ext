@@ -586,3 +586,84 @@ TEST(ResultTests, RethrowException)
         }
     }
 }
+
+TEST(ResultTests, BindOperator)
+{
+    auto fn = [](int n) -> Result<std::string, int>
+        {
+            return Success<std::string>(std::to_string(n));
+        };
+
+    {
+        Result<int, int> r1 { Success<int>(10) };
+        const auto r2 = r1 >>= fn;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), "10");
+    }
+
+    {
+        Result<const int, int> r1 { Success<const int>(10) };
+        const auto r2 = r1 >>= fn;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), "10");
+    }
+
+    {
+        int a = 10;
+        Result<int&, int> r1 { Success<int&>(a) };
+        const auto r2 = r1 >>= fn;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), "10");
+    }
+
+    {
+        int a = 10;
+        Result<const int&, int> r1 { Success<const int&>(a) };
+        const auto r2 = r1 >>= fn;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), "10");
+    }
+}
+
+TEST(ResultTests, MapOperator)
+{
+    auto fn1 = [](int n) -> std::string
+        {
+            return std::to_string(n);
+        };
+
+    auto fn2 = [](const std::string& str)
+        {
+            return str.size();
+        };
+
+    {
+        Result<int, int> r1 { Success<int>(10) };
+        const auto r2 = r1 | fn1 | fn2;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), 2U);
+    }
+
+    {
+        Result<const int, int> r1 { Success<const int>(10) };
+        const auto r2 = r1 | fn1 | fn2;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), 2U);
+    }
+
+    {
+        int a = 10;
+        Result<int&, int> r1 { Success<int&>(a) };
+        const auto r2 = r1 | fn1 | fn2;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), 2U);
+    }
+
+    {
+        int a = 10;
+        Result<const int&, int> r1 { Success<const int&>(a) };
+        const auto r2 = r1 | fn1 | fn2;
+        ASSERT_TRUE(r2.success());
+        ASSERT_EQ(r2.value(), 2U);
+    }
+}

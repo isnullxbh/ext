@@ -22,7 +22,27 @@ It is a header-only library.
 
 ### Install (using Conan)
 
-TODO
+Add repository:
+
+```shell
+conan remote add isnullxbh/testing https://109.195.38.72:8081/artifactory/api/conan/public-conan
+```
+
+Add ext to the _requires_ section of the conanfile.txt:
+
+```text
+[requires]
+...
+ext/0.1.2
+```
+
+Using CMake wrapper for the Conan:
+
+```cmake
+conan_cmake_configure(REQUIRES # other libraries...
+                               ext/0.1.2
+    GENERATORS cmake)
+```
 
 ## License
 

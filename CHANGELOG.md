@@ -7,18 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Define bind operator for the Result type: >>= ([EXT-5](https://github.com/isnullxbh/ext/issues/5)).
+- Define map operator for the Result type: | ([EXT-6](https://github.com/isnullxbh/ext/issues/6)).
+- Maybe ([EXT-4](https://github.com/isnullxbh/ext/issues/4)).
+- None (as part of [EXT-4](https://github.com/isnullxbh/ext/issues/4)).
+- Define bind operator for the Maybe type: >>= ([EXT-7](https://github.com/isnullxbh/ext/issues/7)).
+- Define map operator for the Maybe type: | ([EXT-8](https://github.com/isnullxbh/ext/issues/8)).
+
 ## [0.1.2] - 2021-05-25
 
-Changed:
+### Fixed:
 
-- Add missing headers
+- Add missing headers.
 
 ## [0.1.1] - 2021-05-24
 
-Added:
+### Added:
 
-- Holder (as part of [EXT-1](https://github.com/isnullxbh/ext/issues/1))
-- Result ([EXT-1](https://github.com/isnullxbh/ext/issues/1))
+- Holder (as part of [EXT-1](https://github.com/isnullxbh/ext/issues/1)).
+- Result ([EXT-1](https://github.com/isnullxbh/ext/issues/1)).
 
 [Unreleased]: https://github.com/isnullxbh/ext/compare/v0.1.2...HEAD
 [0.1.2]: https://github.com/isnullxbh/ext/compare/v0.1.1...v0.1.2

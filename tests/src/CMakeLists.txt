@@ -25,6 +25,7 @@ target_include_directories(${EXT_TESTS} PRIVATE
 target_sources(${EXT_TESTS} PRIVATE
     main.cpp
     holder.tests.cpp
+    maybe.tests.cpp
     result.tests.cpp)
 
 target_link_directories(${EXT_TESTS} PRIVATE
