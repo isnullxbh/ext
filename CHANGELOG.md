@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Maybe ([EXT-4](https://github.com/isnullxbh/ext/issues/4)).
 - None (as part of [EXT-4](https://github.com/isnullxbh/ext/issues/4)).
 - Define bind operator for the Maybe type: >>= ([EXT-7](https://github.com/isnullxbh/ext/issues/7)).
+- Define map operator for the Maybe type: | ([EXT-8](https://github.com/isnullxbh/ext/issues/8)).
 
 ## [0.1.2] - 2021-05-25
 

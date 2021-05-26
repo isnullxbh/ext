@@ -53,6 +53,26 @@ template<typename T, typename Function>
 constexpr auto operator>>=(const Maybe<T>& maybe, Function&& function) -> std::invoke_result_t<Function, const T&>;
 
 /**
+ * @brief   Applies the given function to the value of the maybe.
+ *
+ * @tparam  T         Maybe value type.
+ * @tparam  Function  Function type.
+ * @param   maybe     A reference to the maybe.
+ * @param   function  Function.
+ *
+ * @return  If the maybe has a value - result of applying the given function to the value of maybe,
+ *          otherwise - empty maybe.
+ *
+ * @throw   Any exception thrown by the given function.
+ *
+ * @since   0.1.3
+ */
+
+template<typename T, typename Function>
+    requires std::is_invocable_v<Function, const T&>
+constexpr auto operator|(const Maybe<T>& maybe, Function&& function) -> Maybe<std::invoke_result_t<Function, const T&>>;
+
+/**
  * @brief   Compares two maybe for equality.
  *
  * @tparam  T    Maybe value type.
@@ -716,6 +736,13 @@ requires std::is_invocable_v<Function, const T&>
 constexpr auto operator>>=(const Maybe<T>& maybe, Function&& function) -> std::invoke_result_t<Function, const T&>
 {
     return maybe.bind(std::move(function));
+}
+
+template<typename T, typename Function>
+    requires std::is_invocable_v<Function, const T&>
+constexpr auto operator|(const Maybe<T>& maybe, Function&& function) -> Maybe<std::invoke_result_t<Function, const T&>>
+{
+    return maybe.map(std::forward<Function>(function));
 }
 
 template<typename T>
