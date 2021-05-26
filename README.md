@@ -8,6 +8,7 @@ The C++ standard library extensions
     - [Holder<T>](include/ext/holder.hpp)
 - Error handling
     - [Result<T, E>](include/ext/result.hpp)
+    - [Maybe\<T>](include/ext/maybe.hpp)
 
 ## Getting started
 
