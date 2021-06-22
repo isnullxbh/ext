@@ -26,7 +26,9 @@ It is a header-only library.
 Add repository:
 
 ```shell
-conan remote add isnullxbh/testing https://109.195.38.72:8081/artifactory/api/conan/public-conan
+conan remote add isnullxbh/testing https://artifactory.isnullxbh.me/artifactory/api/conan/public-conan
+#                ^
+#                You can use any other name here.
 ```
 
 Add ext to the _requires_ section of the conanfile.txt:
@@ -34,14 +36,14 @@ Add ext to the _requires_ section of the conanfile.txt:
 ```text
 [requires]
 ...
-ext/0.1.2
+ext/0.1.3
 ```
 
 Using CMake wrapper for the Conan:
 
 ```cmake
 conan_cmake_configure(REQUIRES # other libraries...
-                               ext/0.1.2
+                               ext/0.1.3
     GENERATORS cmake)
 ```
 
@@ -49,6 +51,6 @@ conan_cmake_configure(REQUIRES # other libraries...
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 
-## Contact
+## Author
 
 Oleg E. Vorobiov <isnullxbh@gmail.com>
