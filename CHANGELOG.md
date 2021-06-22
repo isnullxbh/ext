@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Add base class for library-defined exceptions (as part of [EXT-15](https://github.com/isnullxbh/ext/issues/15)).
 - Reference ([EXT-15](https://github.com/isnullxbh/ext/issues/15)).
+- Add rvalue ref-qualified overloads for value/error functions ([EXT-14](https://github.com/isnullxbh/ext/issues/14)).
 
 ## [0.1.3] - 2021-05-27
 
