@@ -4,11 +4,15 @@ The C++ standard library extensions
 
 ## Index
 
-- Common
-    - [Holder<T>](include/ext/holder.hpp)
-- Error handling
-    - [Result<T, E>](include/ext/result.hpp)
-    - [Maybe\<T>](include/ext/maybe.hpp)
+ext  
+│  
+├── Common  
+│&ensp;&ensp;&ensp;&ensp;├── [Holder\<T>](include/ext/holder.hpp)  
+│&ensp;&ensp;&ensp;&ensp;├── [Exception](include/ext/exceptions.hpp)  
+│&ensp;&ensp;&ensp;&ensp;└── [Reference\<T>](include/ext/reference.hpp)  
+└── Error handling  
+&ensp;&ensp;&ensp;&ensp;&ensp;├──[Result<T, E>](include/ext/result.hpp)  
+&ensp;&ensp;&ensp;&ensp;&ensp;└──[Maybe\<T>](include/ext/maybe.hpp)
 
 ## Getting started
 
@@ -17,11 +21,34 @@ The C++ standard library extensions
 - C++ compiler supported C++20
 - Conan (optional)
 
+### Dependencies
+
+| Target | Dependencies |
+| :----- | ------------ |
+| ext | None |
+| ext.tests | [Google Test](https://conan.io/center/gtest)
+
+### Build options
+
+| Option | Description | Default |
+| :-----: | ----------- | ------- |
+| **WITH_TESTS** | Compile library with unit tests | OFF (disabled) |
+| **HEADER_ONLY** | Use as a header-only library | OFF (enabled) |
+
 ### Build
 
-It is a header-only library.
+Example:
 
-### Install (using Conan)
+```shell
+mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Debug \
+      -DCMAKE_CXX_FLAGS="-std=c++2a -Wall -pedantic -Wextra -Weffc++ -Wconversion" \
+      -DHEADER_ONLY=OFF \
+      ..
+make -j $(nproc)
+```
+
+### Installation
 
 Add repository:
 
