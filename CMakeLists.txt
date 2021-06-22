@@ -8,6 +8,9 @@ option(WITH_TESTS "Build the library with unit tests" OFF)
 
 set(EXT "${PROJECT_NAME}")
 
+add_definitions(
+    -include ${CMAKE_CURRENT_SOURCE_DIR}/include/ext/platform.hpp)
+
 add_subdirectory(src)
 
 if(WITH_TESTS)

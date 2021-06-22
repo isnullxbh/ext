@@ -4,7 +4,9 @@
  * @date    21.05.2021
  */
 
-#include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_PUSH
+#   include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_POP
 
 auto main(int argc, char** argv) -> int
 {

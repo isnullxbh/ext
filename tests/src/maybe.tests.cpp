@@ -7,7 +7,9 @@
 #include <type_traits>
 #include <string>
 
-#include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_PUSH
+#   include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_POP
 
 #include <ext/maybe.hpp>
 
