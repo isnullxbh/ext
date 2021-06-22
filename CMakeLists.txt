@@ -5,11 +5,15 @@ project(ext VERSION 0.1.3
             LANGUAGES CXX)
 
 option(WITH_TESTS "Build the library with unit tests" OFF)
+option(HEADER_ONLY "Use as a header-only library" OFF)
 
 set(EXT "${PROJECT_NAME}")
 
 add_definitions(
     -include ${CMAKE_CURRENT_SOURCE_DIR}/include/ext/platform.hpp)
+
+add_compile_definitions(
+    $<$<BOOL:${HEADER_ONLY}>:EXT_HEADER_ONLY>)
 
 add_subdirectory(src)
 

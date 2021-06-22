@@ -18,6 +18,13 @@
 #   error Compiler is not supported
 #endif
 
+// Header-only
+#ifdef EXT_HEADER_ONLY
+#   define EXT_INLINE inline
+#else
+#   define EXT_INLINE
+#endif
+
 // Utility macros
 #define EXT_STRINGIFY_(ARG) #ARG
 #define EXT_STRINGIFY(ARG) EXT_STRINGIFY_(ARG)
