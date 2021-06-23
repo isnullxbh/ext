@@ -4,16 +4,15 @@ The C++ standard library extensions
 
 ## Index
 
-ext  
-├── Algorithms  
-│&ensp;&ensp;&ensp;&ensp;└── [On tuples](include/ext/tuple.hpp)  
-├── Common  
-│&ensp;&ensp;&ensp;&ensp;├── [Holder\<T>](include/ext/holder.hpp)  
-│&ensp;&ensp;&ensp;&ensp;├── [Exception](include/ext/exceptions.hpp)  
-│&ensp;&ensp;&ensp;&ensp;└── [Reference\<T>](include/ext/reference.hpp)  
-└── Error handling  
-&ensp;&ensp;&ensp;&ensp;&ensp;├──[Result<T, E>](include/ext/result.hpp)  
-&ensp;&ensp;&ensp;&ensp;&ensp;└──[Maybe\<T>](include/ext/maybe.hpp)
+- Algorithms
+    - [On tuples](include/ext/tuple.hpp)
+- Common
+    - [Holder\<T>](include/ext/holder.hpp)
+    - [Exception](include/ext/exceptions.hpp)
+    - [Reference\<T>](include/ext/reference.hpp)
+- Error handling
+    - [Result<T, E>](include/ext/result.hpp)
+    - [Maybe\<T>](include/ext/maybe.hpp)
 
 ## Getting started
 
