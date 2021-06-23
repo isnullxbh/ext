@@ -33,7 +33,7 @@ The C++ standard library extensions
 | Option | Description | Default |
 | :-----: | ----------- | ------- |
 | **WITH_TESTS** | Compile library with unit tests | OFF (disabled) |
-| **HEADER_ONLY** | Use as a header-only library | OFF (enabled) |
+| **HEADER_ONLY** | Use as a header-only library | OFF (disabled) |
 
 ### Build
 
