@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(ext VERSION 0.1.3
+project(ext VERSION 0.1.4
             DESCRIPTION "The C++ standard library extensions"
             HOMEPAGE_URL "https://github.com/isnullxbh/ext"
             LANGUAGES CXX)

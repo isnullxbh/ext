@@ -7,12 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2021-06-23
+
 ### Added
 
 - Add base class for library-defined exceptions (as part of [EXT-15](https://github.com/isnullxbh/ext/issues/15)).
 - Reference ([EXT-15](https://github.com/isnullxbh/ext/issues/15)).
 - Add rvalue ref-qualified overloads for value/error functions ([EXT-14](https://github.com/isnullxbh/ext/issues/14)).
 - Add algorithms on tuples ([EXT-16](https://github.com/isnullxbh/ext/issues/16)).
+
+### Changed
+
+- Add support to switch compilation mode: header-only/compiled.
 
 ## [0.1.3] - 2021-05-27
 
@@ -38,7 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Holder (as part of [EXT-1](https://github.com/isnullxbh/ext/issues/1)).
 - Result ([EXT-1](https://github.com/isnullxbh/ext/issues/1)).
 
-[Unreleased]: https://github.com/isnullxbh/ext/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/isnullxbh/ext/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/isnullxbh/ext/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/isnullxbh/ext/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/isnullxbh/ext/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/isnullxbh/ext/releases/v0.1.1

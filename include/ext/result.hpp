@@ -261,6 +261,8 @@ public:
      *
      * @throw   std::bad_variant_access - will be thrown if the result store
      *          a value of the error type.
+     *
+     * @since   0.1.4
      */
 
     constexpr auto value() && -> std::remove_reference_t<T>&&;
@@ -272,6 +274,8 @@ public:
      *
      * @throw   std::bad_variant_access - will be thrown if the result store
      *          a value of the error type.
+     *
+     * @since   0.1.4
      */
 
     constexpr auto value() const && -> const std::remove_reference_t<T>&&;
@@ -323,6 +327,8 @@ public:
      *
      * @throw   std::bad_variant_access - will be thrown if the result store
      *          a value of the value type.
+     *
+     * @since   0.1.4
      */
 
     constexpr auto error() && -> std::remove_reference_t<E>&&;
@@ -334,6 +340,8 @@ public:
      *
      * @throw   std::bad_variant_access - will be thrown if the result store
      *          a value of the value type.
+     *
+     * @since   0.1.4
      */
 
     constexpr auto error() const && -> const std::remove_reference_t<E>&&;

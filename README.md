@@ -5,7 +5,8 @@ The C++ standard library extensions
 ## Index
 
 ext  
-│  
+├── Algorithms  
+│&ensp;&ensp;&ensp;&ensp;└── [On tuples](include/ext/tuple.hpp)  
 ├── Common  
 │&ensp;&ensp;&ensp;&ensp;├── [Holder\<T>](include/ext/holder.hpp)  
 │&ensp;&ensp;&ensp;&ensp;├── [Exception](include/ext/exceptions.hpp)  
@@ -63,14 +64,14 @@ Add ext to the _requires_ section of the conanfile.txt:
 ```text
 [requires]
 ...
-ext/0.1.3
+ext/0.1.4
 ```
 
 Using CMake wrapper for the Conan:
 
 ```cmake
 conan_cmake_configure(REQUIRES # other libraries...
-                               ext/0.1.3
+                               ext/0.1.4
     GENERATORS cmake)
 ```
 

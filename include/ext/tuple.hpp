@@ -19,6 +19,8 @@ namespace ext {
  * @tparam  F      Function type.
  * @param   tuple  Tuple.
  * @param   f      Function.
+ *
+ * @since   0.1.4
  */
 
 template<typename Tuple, typename F>
@@ -33,6 +35,8 @@ constexpr auto foreach(Tuple& tuple, F&& f) -> void;
  * @param   predicate  Predicate.
  *
  * @return  If element was found (true, index), otherwise - (false, 0).
+ *
+ * @since   0.1.4
  */
 
 template<typename Tuple, typename Predicate>
@@ -47,6 +51,8 @@ constexpr auto findIf(Tuple& tuple, const Predicate& predicate) -> std::pair<boo
  * @param   f      Function.
  *
  * @return  A new tuple.
+ *
+ * @since   0.1.4
  */
 
 template<typename F, typename... Ts>
@@ -61,6 +67,8 @@ constexpr auto transform(const std::tuple<Ts...>& tuple, F&& f) -> decltype(auto
  * @param   predicate  Predicate.
  *
  * @return  If all elements match the specified predicate - true, otherwise - false.
+ *
+ * @since   0.1.4
  */
 
 template<typename Predicate, typename... Ts>
@@ -75,6 +83,8 @@ constexpr auto allOf(const std::tuple<Ts...>& tuple, Predicate&& predicate) -> b
  * @param   predicate  Predicate.
  *
  * @return  If any element matches the specified predicate - true, otherwise - false.
+ *
+ * @since   0.1.4
  */
 
 template<typename Predicate, typename... Ts>
@@ -89,6 +99,8 @@ constexpr auto anyOf(const std::tuple<Ts...>& tuple, Predicate&& predicate) -> b
  * @param   predicate  Predicate.
  *
  * @return  If no elements that match the specified predicate - true, otherwise - false.
+ *
+ * @since   0.1.4
  */
 
 template<typename Predicate, typename... Ts>
