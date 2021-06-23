@@ -15,9 +15,7 @@ namespace ext {
  * @since   0.1.3
  */
 
-struct None final {};
-
-constexpr inline None none {};
+constexpr struct None final {} none;
 
 } // namespace ext
 
