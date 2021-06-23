@@ -13,9 +13,28 @@ namespace testing {
 struct ClassHasDefaultCtor {};
 struct ClassHasNoDefaultCtor { ClassHasNoDefaultCtor() = delete; };
 struct ClassHasCopyCtor {};
-struct ClassHasNoCopyCtor { ClassHasNoCopyCtor(const ClassHasNoCopyCtor&) = delete; ClassHasNoCopyCtor operator=(const ClassHasNoCopyCtor&) = delete; };
 struct ClassHasMoveCtor {};
-struct ClassHasNoMoveCtor { ClassHasNoMoveCtor(ClassHasNoMoveCtor&&) = delete; ClassHasNoMoveCtor operator=(ClassHasNoMoveCtor&&) = delete; };
+
+struct ClassHasNoCopyCtor
+{
+    ClassHasNoCopyCtor(const ClassHasNoCopyCtor&) = delete;
+    ClassHasNoCopyCtor& operator=(const ClassHasNoCopyCtor&) = delete;
+};
+
+struct ClassHasNoMoveCtor
+{
+    ClassHasNoMoveCtor(ClassHasNoMoveCtor&&) = delete;
+    ClassHasNoMoveCtor& operator=(ClassHasNoMoveCtor&&) = delete;
+};
+
+struct ClassHasNoCopyCtorButMovable
+{
+    ClassHasNoCopyCtorButMovable() = default;
+    ClassHasNoCopyCtorButMovable(const ClassHasNoCopyCtorButMovable&) = delete;
+    ClassHasNoCopyCtorButMovable(ClassHasNoCopyCtorButMovable&&) = default;
+    ClassHasNoCopyCtorButMovable& operator=(const ClassHasNoCopyCtorButMovable&) = delete;
+    ClassHasNoCopyCtorButMovable& operator=(ClassHasNoCopyCtorButMovable&&) = default;
+};
 
 } // namespace testing
 } // namespace ext

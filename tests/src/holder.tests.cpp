@@ -6,7 +6,9 @@
 
 #include <type_traits>
 
-#include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_PUSH
+#   include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_POP
 
 #include <ext/holder.hpp>
 #include <ext/utility_classes.hpp>

@@ -1,12 +1,19 @@
 cmake_minimum_required(VERSION 3.18)
-project(ext VERSION 0.1.3
+project(ext VERSION 0.1.4
             DESCRIPTION "The C++ standard library extensions"
             HOMEPAGE_URL "https://github.com/isnullxbh/ext"
             LANGUAGES CXX)
 
 option(WITH_TESTS "Build the library with unit tests" OFF)
+option(HEADER_ONLY "Use as a header-only library" OFF)
 
 set(EXT "${PROJECT_NAME}")
+
+add_definitions(
+    -include ${CMAKE_CURRENT_SOURCE_DIR}/include/ext/platform.hpp)
+
+add_compile_definitions(
+    $<$<BOOL:${HEADER_ONLY}>:EXT_HEADER_ONLY>)
 
 add_subdirectory(src)
 

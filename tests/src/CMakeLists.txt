@@ -26,7 +26,9 @@ target_sources(${EXT_TESTS} PRIVATE
     main.cpp
     holder.tests.cpp
     maybe.tests.cpp
-    result.tests.cpp)
+    reference.tests.cpp
+    result.tests.cpp
+    tuple.tests.cpp)
 
 target_link_directories(${EXT_TESTS} PRIVATE
     ${CONAN_LIB_DIRS})

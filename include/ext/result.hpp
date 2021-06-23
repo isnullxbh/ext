@@ -241,7 +241,7 @@ public:
      *          a value of the error type.
      */
 
-    constexpr auto value() -> std::remove_reference_t<T>&;
+    constexpr auto value() & -> std::remove_reference_t<T>&;
 
     /**
      * @brief   Gets the value of the result.
@@ -252,7 +252,33 @@ public:
      *          a value of the error type.
      */
 
-    constexpr auto value() const -> const std::remove_reference_t<T>&;
+    constexpr auto value() const & -> const std::remove_reference_t<T>&;
+
+    /**
+     * @brief   Gets the value of the result.
+     *
+     * @return  A forwarding reference to the stored value.
+     *
+     * @throw   std::bad_variant_access - will be thrown if the result store
+     *          a value of the error type.
+     *
+     * @since   0.1.4
+     */
+
+    constexpr auto value() && -> std::remove_reference_t<T>&&;
+
+    /**
+     * @brief   Gets the value of the result.
+     *
+     * @return  A forwarding reference to the stored value.
+     *
+     * @throw   std::bad_variant_access - will be thrown if the result store
+     *          a value of the error type.
+     *
+     * @since   0.1.4
+     */
+
+    constexpr auto value() const && -> const std::remove_reference_t<T>&&;
 
     /**
      * @brief   Gets the value of the result.
@@ -281,7 +307,7 @@ public:
      *          a value of the value type.
      */
 
-    constexpr auto error() -> std::remove_reference_t<E>&;
+    constexpr auto error() & -> std::remove_reference_t<E>&;
 
     /**
      * @brief   Gets the error of the result.
@@ -292,7 +318,33 @@ public:
      *          a value of the value type.
      */
 
-    constexpr auto error() const -> const std::remove_reference_t<E>&;
+    constexpr auto error() const & -> const std::remove_reference_t<E>&;
+
+    /**
+     * @brief   Gets the error of the result.
+     *
+     * @return  A forwarding reference to the stored error.
+     *
+     * @throw   std::bad_variant_access - will be thrown if the result store
+     *          a value of the value type.
+     *
+     * @since   0.1.4
+     */
+
+    constexpr auto error() && -> std::remove_reference_t<E>&&;
+
+    /**
+     * @brief   Gets the error of the result.
+     *
+     * @return  A forwarding reference to the stored error.
+     *
+     * @throw   std::bad_variant_access - will be thrown if the result store
+     *          a value of the value type.
+     *
+     * @since   0.1.4
+     */
+
+    constexpr auto error() const && -> const std::remove_reference_t<E>&&;
 
     /**
      * @brief   Rethrows exception.
@@ -383,15 +435,27 @@ constexpr Result<T, E>::operator bool() const noexcept
 }
 
 template<typename T, typename E>
-constexpr auto Result<T, E>::value() -> std::remove_reference_t<T>&
+constexpr auto Result<T, E>::value() & -> std::remove_reference_t<T>&
 {
     return std::get<Holder<T>>(m_storage).value();
 }
 
 template<typename T, typename E>
-constexpr auto Result<T, E>::value() const -> const std::remove_reference_t<T>&
+constexpr auto Result<T, E>::value() const & -> const std::remove_reference_t<T>&
 {
     return std::get<Holder<T>>(m_storage).value();
+}
+
+template<typename T, typename E>
+constexpr auto Result<T, E>::value() && -> std::remove_reference_t<T>&&
+{
+    return std::move(std::get<Holder<T>>(m_storage).value());
+}
+
+template<typename T, typename E>
+constexpr auto Result<T, E>::value() const && -> const std::remove_reference_t<T>&&
+{
+    return std::move(std::get<Holder<T>>(m_storage).value());
 }
 
 template<typename T, typename E>
@@ -407,15 +471,27 @@ constexpr auto Result<T, E>::valueOr(const T& value) const noexcept -> const std
 }
 
 template<typename T, typename E>
-constexpr auto Result<T, E>::error() -> std::remove_reference_t<E>&
+constexpr auto Result<T, E>::error() & -> std::remove_reference_t<E>&
 {
     return std::get<Failure<E>>(m_storage).value();
 }
 
 template<typename T, typename E>
-constexpr auto Result<T, E>::error() const -> const std::remove_reference_t<E>&
+constexpr auto Result<T, E>::error() const & -> const std::remove_reference_t<E>&
 {
     return std::get<Failure<E>>(m_storage).value();
+}
+
+template<typename T, typename E>
+constexpr auto Result<T, E>::error() && -> std::remove_reference_t<E>&&
+{
+    return std::move(std::get<Failure<E>>(m_storage).value());
+}
+
+template<typename T, typename E>
+constexpr auto Result<T, E>::error() const && -> const std::remove_reference_t<E>&&
+{
+    return std::move(std::get<Failure<E>>(m_storage).value());
 }
 
 template<typename T, typename E>

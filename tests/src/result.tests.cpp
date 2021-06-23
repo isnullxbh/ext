@@ -6,9 +6,13 @@
 
 #include <string>
 
-#include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_PUSH
+#   include <gtest/gtest.h>
+EXT_DISABLE_WARNINGS_POP
 
 #include <ext/result.hpp>
+
+#include <ext/utility_classes.hpp>
 
 using namespace ext;
 
@@ -665,5 +669,27 @@ TEST(ResultTests, MapOperator)
         const auto r2 = r1 | fn1 | fn2;
         ASSERT_TRUE(r2.success());
         ASSERT_EQ(r2.value(), 2U);
+    }
+}
+
+TEST(ResultTests, GetValueWhenResultIsRValue)
+{
+    using namespace ext::testing;
+
+    {
+        ClassHasNoCopyCtorButMovable object {};
+        Result<ClassHasNoCopyCtorButMovable, int> res { Success<ClassHasNoCopyCtorButMovable>(std::move(object)) };
+        object = std::move(res).value();
+    }
+}
+
+TEST(ResultTests, GetErrorWhenResultIsRValue)
+{
+    using namespace ext::testing;
+
+    {
+        ClassHasNoCopyCtorButMovable object {};
+        Result<int, ClassHasNoCopyCtorButMovable> res { Failure<ClassHasNoCopyCtorButMovable>(std::move(object)) };
+        object = std::move(res).error();
     }
 }
