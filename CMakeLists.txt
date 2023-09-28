@@ -4,4 +4,10 @@ project(ext VERSION 0.0.0
             HOMEPAGE_URL "https://github.com/isnullxbh/ext"
             LANGUAGES C CXX)
 
+option(EXT_BUILD_TESTS "Create a build target for the unit tests" OFF)
+
 add_subdirectory(src)
+
+if(EXT_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
