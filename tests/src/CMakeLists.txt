@@ -8,7 +8,8 @@ target_include_directories(ext.tests
 
 target_sources(ext.tests
     PRIVATE
-        main.cpp)
+        main.cpp
+        ext/type_list.test.cpp)
 
 target_link_libraries(ext.tests
     PRIVATE
