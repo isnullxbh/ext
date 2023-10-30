@@ -23,6 +23,22 @@ public:
     static constexpr auto npos = static_cast<std::size_t>(-1);
 };
 
+template<typename T>
+struct pop_front_op;
+
+template<typename T, typename... Ts>
+struct pop_front_op<type_list<T, Ts...>>
+{
+    using type = type_list<Ts...>;
+};
+
+template<>
+struct pop_front_op<type_list<>>
+{
+    // TODO: error?
+    using type = type_list<>;
+};
+
 template<typename... Ts>
 class type_list_ops : public type_list_base
 {
@@ -85,21 +101,6 @@ public:
         };
 
         using type = foldl_op<type_list<>, conditional_inserter, Ts...>::type;
-    };
-
-    template<typename... Us>
-    struct pop_front_op;
-
-    template<typename U, typename... Us>
-    struct pop_front_op<U, Us...>
-    {
-        using type = type_list<Us...>;
-    };
-
-    template<>
-    struct pop_front_op<>
-    {
-        using type = type_list<>;
     };
 
     template<template<typename> typename Predicate>
@@ -231,15 +232,6 @@ public:
         using type = type_list<Ts..., Us...>;
     };
 
-    template<typename... Us>
-    struct pop_back_op;
-
-    template<typename... Us>
-    struct pop_back_op<type_list<Us...>>
-    {
-        using type = pop_front_op<Us...>::type;
-    };
-
     template<template<typename> typename Predicate, std::size_t Pos>
     struct find_if_op
     {
@@ -319,12 +311,6 @@ public:
 
         using type = typename switcher<type_list<Ts...>>::type;
     };
-
-    template<typename T>
-    struct is_equal_op : std::false_type {};
-
-    template<>
-    struct is_equal_op<type_list<Ts...>> : std::true_type {};
 };
 
 } // namespace ext::detail

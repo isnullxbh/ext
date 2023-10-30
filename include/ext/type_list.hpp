@@ -58,10 +58,10 @@ public:
     using set = base::template set_op<N, U>::type;
 
     /// Removes the last element.
-    using pop_back = base::template pop_back_op<type_list::reverse>::type::reverse;
+    using pop_back = detail::pop_front_op<type_list::reverse>::type::reverse;
 
     /// Removes the first element.
-    using pop_front = base::template pop_front_op<Ts...>::type;
+    using pop_front = detail::pop_front_op<type_list>::type;
 
     /// Adds the Us types to the end.
     /// @tparam Us Types.
@@ -124,7 +124,7 @@ public:
     /// Checks if type lists are equal.
     /// @tparam U Type list to compare.
     template<typename U>
-    static constexpr auto is_equal = base::template is_equal_op<U>::value;
+    static constexpr auto is_equal = std::is_same_v<U, type_list<Ts...>>;
 
     /// The number of elements in the type list.
     static constexpr auto size = sizeof...(Ts);
