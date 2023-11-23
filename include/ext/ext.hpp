@@ -11,4 +11,7 @@
 /// @defgroup ext-metaprogramming Metaprogramming
 /// @ingroup  ext
 
+/// @defgroup ext-utility Utility
+/// @ingroup  ext
+
 #include <ext/type_list.hpp>
