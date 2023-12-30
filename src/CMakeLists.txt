@@ -1,4 +1,4 @@
-add_library(ext)
+add_library(ext INTERFACE)
 
 set_target_properties(ext
     PROPERTIES
@@ -6,11 +6,5 @@ set_target_properties(ext
         PREFIX      "")
 
 target_include_directories(ext
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/../include
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_sources(ext
-    PRIVATE
-        ext/ext.cpp)
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../include)
