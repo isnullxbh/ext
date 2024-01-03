@@ -302,3 +302,38 @@ TEST(TypeListTests, Sort)
         static_assert(l1::is_equal<type_list<double, double, int>>);
     }
 }
+
+namespace
+{
+    template<std::size_t I>
+    struct foo
+    {
+        static constexpr auto value = I;
+    };
+}
+
+TEST(TypeListTests, ForEach)
+{
+    using namespace ext;
+    using l = type_list<foo<1>, foo<2>, foo<3>>;
+    constexpr auto value = []
+    {
+        std::size_t sum = 0;
+        l::for_each([&]<typename T>(type_holder<T>){ sum += T::value; });
+        return sum;
+    }();
+    static_assert(value == 6);
+}
+
+TEST(TypeListTests, Enumerate)
+{
+    using namespace ext;
+    using l = type_list<int, char, double>;
+    constexpr auto value = []
+    {
+        std::array<int, l::size> arr {};
+        l::enumerate([&, i = 0]<typename T, std::size_t Index>(indexed_type_holder<T, Index>) mutable { arr[i++] = Index; });
+        return arr;
+    }();
+    static_assert(value[0] == 0 && value[1] == 1 && value[2] == 2);
+}
