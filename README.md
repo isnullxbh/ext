@@ -41,9 +41,10 @@ cmake --install build/debug
 
 - Extensions
   - Metaprogramming
-    - [Type list](include/ext/type_list.hpp)
-    - [Type holder](include/ext/type_holder.hpp)
-    - [Indexed type holder](include/ext/type_holder.hpp)
+    - [ext::type_list](include/ext/type_list.hpp)
+    - [ext::type_holder](include/ext/type_holder.hpp)
+    - [ext::indexed_type_holder](include/ext/type_holder.hpp)
+    - [ext::ignore](include/ext/ignore.hpp)
 
 ## Author
 
