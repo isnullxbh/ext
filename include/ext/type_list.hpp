@@ -152,10 +152,7 @@ public:
 
 private:
     template<typename F, std::size_t... Indexes>
-    static constexpr auto enumerate(F&& f, std::index_sequence<Indexes...>)
-    {
-        (f(indexed_type_holder<Ts, Indexes>{}), ...);
-    }
+    static constexpr auto enumerate(F&& f, std::index_sequence<Indexes...>);
 };
 
 template<typename... Ts>
