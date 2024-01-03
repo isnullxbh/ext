@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Add the following operations to the type list: `for_each`, `enumerate` ([EXT-10](https://github.com/isnullxbh/ext/issues/10)).
+
 ## [0.1.0] - 2024-01-01
 
 ### Added

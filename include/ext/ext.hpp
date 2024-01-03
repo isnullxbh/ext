@@ -11,4 +11,5 @@
 /// @defgroup ext-metaprogramming Metaprogramming
 /// @ingroup  ext
 
+#include <ext/type_holder.hpp>
 #include <ext/type_list.hpp>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ext/detail/type_list_ops.hpp>
+#include <ext/type_holder.hpp>
 
 namespace ext
 {
@@ -15,7 +16,7 @@ namespace ext
 template<typename T>
 struct is_type_list : detail::is_type_list_impl<T> {};
 
-/// A list of types.
+/// A type list.
 /// @tparam  Ts Types.
 /// @ingroup ext-metaprogramming-typelist
 /// @since   0.1.0
@@ -78,6 +79,20 @@ public:
     template<typename L>
     using concat = base::template concat_op<L>::type;
 
+    /// Invokes the specified functor for each type (wrapped in a type holder) in the type list.
+    /// @tparam F Functor type.
+    /// @param  f Functor.
+    /// @since  0.2.0
+    template<typename F>
+    static constexpr auto for_each(F&& f) -> void;
+
+    /// Invokes the specified functor for each type (wrapped in a indexed type holder) in the type list.
+    /// @tparam F Functor type.
+    /// @param  f Functor.
+    /// @since  0.2.0
+    template<typename F>
+    static constexpr auto enumerate(F&& f) -> void;
+
     /// Left-associative fold.
     /// @tparam I Accumulator.
     /// @tparam F Metafunction.
@@ -134,6 +149,34 @@ public:
 
     /// Integer value that represent the invalid index.
     using base::npos;
+
+private:
+    template<typename F, std::size_t... Indexes>
+    static constexpr auto enumerate(F&& f, std::index_sequence<Indexes...>)
+    {
+        (f(indexed_type_holder<Ts, Indexes>{}), ...);
+    }
 };
+
+template<typename... Ts>
+template<typename F>
+constexpr auto type_list<Ts...>::for_each(F&& f) -> void
+{
+    (f(type_holder<Ts>{}), ...);
+}
+
+template<typename... Ts>
+template<typename F>
+constexpr auto type_list<Ts...>::enumerate(F&& f) -> void
+{
+    enumerate(std::forward<F>(f), std::make_index_sequence<size>());
+}
+
+template<typename... Ts>
+template<typename F, std::size_t... Indexes>
+constexpr auto type_list<Ts...>::enumerate(F&& f, std::index_sequence<Indexes...>)
+{
+    (f(indexed_type_holder<Ts, Indexes>{}), ...);
+}
 
 } // namespace ext
