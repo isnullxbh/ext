@@ -45,6 +45,8 @@ cmake --install build/debug
     - [ext::type_holder](include/ext/type_holder.hpp)
     - [ext::indexed_type_holder](include/ext/type_holder.hpp)
     - [ext::ignore](include/ext/ignore.hpp)
+  - Strings
+    - [ext::fixed_string](include/ext/fixed_string.hpp)
 
 ## Author
 
