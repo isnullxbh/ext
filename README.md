@@ -24,9 +24,10 @@ cmake --build build/debug --target ext
 
 ### Options
 
-|       Name        |               Description                | Since | Default |
-|:-----------------:|:----------------------------------------:|:-----:|:-------:|
-| `EXT_BUILD_TESTS` | Create a build target for the unit tests | 0.1.0 |   OFF   |
+| Name                 |               Description                | Since | Default |
+|:---------------------|:----------------------------------------:|:-----:|:-------:|
+| `EXT_BUILD_TESTS`    | Create a build target for the unit tests | 0.1.0 |   OFF   |
+| `EXT_BUILD_EXAMPLES` |    Create build targets for examples     | 0.1.0 |   OFF   |
 
 ## Installation
 
@@ -47,6 +48,24 @@ cmake --install build/debug
     - [ext::ignore](include/ext/ignore.hpp)
   - Strings
     - [ext::fixed_string](include/ext/fixed_string.hpp)
+  - Utility
+    - [ext::value_wrapper](include/ext/value_wrapper.hpp)
+      - Extensions:
+        - [ext::value_wrapper_extensions::addition](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::subtraction](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::multiplication](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::division](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::remainder](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::bitwise](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::increment](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::decrement](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::arithmetic](include/ext/value_wrapper.hpp)
+        - [ext::value_wrapper_extensions::logical](include/ext/value_wrapper.hpp)
+
+## Examples
+
+All examples are in [this](./examples) directory. It contains a [file](examples/README.md) with a brief description of 
+each of them.
 
 ## Author
 

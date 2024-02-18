@@ -5,11 +5,16 @@ project(ext VERSION 0.1.0
             LANGUAGES C CXX)
 
 option(EXT_BUILD_TESTS "Create a build target for the unit tests" OFF)
+option(EXT_BUILD_EXAMPLES "Create build targets for examples" OFF)
 
 add_subdirectory(src)
 
 if(EXT_BUILD_TESTS)
     add_subdirectory(tests)
+endif()
+
+if(EXT_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 add_custom_target(ext.generate-docs

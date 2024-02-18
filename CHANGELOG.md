@@ -7,6 +7,7 @@
 - Add the following operations to the type list: `for_each`, `enumerate` ([EXT-10](https://github.com/isnullxbh/ext/issues/10)).
 - Add the `ignore` type ([EXT-12](https://github.com/isnullxbh/ext/issues/12)).
 - Add the `fixed_string` ([EXT-9](https://github.com/isnullxbh/ext/issues/9)).
+- Add the `value_wrapper` ([EXT-17](https://github.com/isnullxbh/ext/issues/17))
 
 ## [0.1.0] - 2024-01-01
 
