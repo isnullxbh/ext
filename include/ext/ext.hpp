@@ -19,7 +19,11 @@
 /// @defgroup ext-metaprogramming Metaprogramming
 /// @ingroup  ext
 
+/// @defgroup ext-utility Utility
+/// @ingroup  ext
+
 #include <ext/fixed_string.hpp>
 #include <ext/ignore.hpp>
 #include <ext/type_holder.hpp>
 #include <ext/type_list.hpp>
+#include <ext/value_wrapper.hpp>
