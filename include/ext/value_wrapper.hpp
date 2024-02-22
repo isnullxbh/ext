@@ -10,7 +10,7 @@
 
 #include <ext/detail/value_wrapper.hpp>
 
-/// @defgroup ext-utility-valuewrapper Value Wrapper
+/// @defgroup ext-utility-valuewrapper ext::value_wrapper
 /// @ingroup  ext-utility
 
 /// @defgroup ext-utility-valuewrapper-extensions Extensions
@@ -84,7 +84,7 @@ template<typename T, typename Tag, template<typename> typename... Extensions>
 class value_wrapper
     : public Extensions<value_wrapper<T, Tag, Extensions...>>...
 {
-    static_assert(std::is_reference_v<T>, "T must not be reference type");
+    static_assert(!std::is_reference_v<T>, "T must not be reference type");
 
 public:
     using value_type = T;   ///< Value type.

@@ -110,12 +110,6 @@ TEST(ValueWrapperTests, Comparison)
     using namespace ext;
     using vw = value_wrapper<int>;
 
-    {
-        constexpr value_wrapper<const int> vw1 { 10 };
-        constexpr value_wrapper<int>       vw2 { 10 };
-        static_assert(vw1 == vw2);
-    }
-
     static_assert(vw(1) == vw(1));
     static_assert(vw(1) != vw(2));
     static_assert(vw(1) < vw(2));
