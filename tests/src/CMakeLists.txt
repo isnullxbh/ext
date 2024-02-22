@@ -10,6 +10,7 @@ target_sources(ext.tests
     PRIVATE
         main.cpp
         ext/fixed_string.test.cpp
+        ext/result.test.cpp
         ext/type_list.test.cpp
         ext/value_wrapper.test.cpp)
 
