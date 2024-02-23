@@ -23,6 +23,13 @@ enum class result_status : char8_t
 namespace detail
 {
 
+namespace result_helpers
+{
+
+struct skip_init {};
+
+} // namespace result_helpers
+
 template<typename T, typename E, typename = void>
 struct result_trivially_destructible
     : std::bool_constant<std::is_trivially_destructible_v<T> &&
@@ -53,6 +60,11 @@ public:
         , _status(result_status::success)
     {}
 
+    /// Constructs an object without initialization of value or error.
+    constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
+        : _status()
+    {}
+
     /// Destructor.
     ~result_storage_base() = default;
 
@@ -73,6 +85,11 @@ public:
         requires std::is_default_constructible_v<T>
         : _value()
         , _status(result_status::success)
+    {}
+
+    /// Constructs an object without initialization of value or error.
+    constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
+        : _status()
     {}
 
     /// Destructor.
@@ -100,7 +117,46 @@ public:
 template<typename T, typename E, typename = void>
 class result_storage
     : public result_storage_base<T, E, void*>
-{};
+{
+public:
+    using result_storage_base<T, E, void*>::result_storage_base;
+
+    /// Constructs value from the specified value.
+    /// @tparam U     Value type.
+    /// @param  value Value with which to initialize the contained value.
+    template<typename U>
+        requires std::is_constructible_v<T, U&&>
+    constexpr auto construct_value(U&& value) noexcept(std::is_nothrow_constructible_v<T, U&&>) -> void
+    {
+        if constexpr (!std::is_trivially_constructible_v<T, U&&>)
+        {
+            std::construct_at(std::addressof(this->_value), std::forward<U>(value));
+        }
+        else
+        {
+            this->_value = std::forward<U>(value);
+        }
+        this->_status = result_status::success;
+    }
+
+    /// Constructs error from the specified value.
+    /// @tparam U     Value type.
+    /// @param  error Value with which to initialize the contained error.
+    template<typename U>
+        requires std::is_constructible_v<E, U&&>
+    constexpr auto construct_error(U&& error) noexcept(std::is_nothrow_constructible_v<E, U&&>) -> void
+    {
+        if constexpr (!std::is_trivially_constructible_v<E, U&&>)
+        {
+            std::construct_at(std::addressof(this->_error), std::forward<U>(error));
+        }
+        else
+        {
+            this->_error = std::forward<U>(error);
+        }
+        this->_status = result_status::failure;
+    }
+};
 
 template<typename T, typename E>
 class result_storage_base<T&, E, void, true>
@@ -108,6 +164,11 @@ class result_storage_base<T&, E, void, true>
 public:
     /// Default constructor.
     result_storage_base() = delete;
+
+    /// Constructs an object without initialization of value or error.
+    constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
+        : _status()
+    {}
 
     /// Destructor.
     ~result_storage_base() = default;
@@ -126,6 +187,11 @@ class result_storage_base<T&, E, void, false>
 public:
     /// Default constructor.
     result_storage_base() = delete;
+
+    /// Constructs an object without initialization of value or error.
+    constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
+        : _status()
+    {}
 
     /// Destructor.
     constexpr ~result_storage_base() noexcept(std::is_nothrow_destructible_v<E>)
@@ -147,7 +213,39 @@ public:
 template<typename T, typename E>
 class result_storage<T&, E>
     : public result_storage_base<T&, E>
-{};
+{
+public:
+    using result_storage_base<T&, E>::result_storage_base;
+
+    /// Constructs value from the specified value.
+    /// @tparam U     Value type.
+    /// @param  value Value with which to initialize the contained value.
+    template<typename U>
+        requires std::is_convertible_v<U&, T&>
+    constexpr auto construct_value(U& value) noexcept -> void
+    {
+        this->_value = std::addressof(value);
+        this->_status = result_status::success;
+    }
+
+    /// Constructs error from the specified value.
+    /// @tparam U     Value type.
+    /// @param  error Value with which to initialize the contained error.
+    template<typename U>
+        requires std::is_constructible_v<E, U&&>
+    constexpr auto construct_error(U&& error) noexcept(std::is_nothrow_constructible_v<E, U&&>) -> void
+    {
+        if constexpr (!std::is_trivially_constructible_v<E, U&&>)
+        {
+            std::construct_at(std::addressof(this->_error), std::forward<U>(error));
+        }
+        else
+        {
+            this->_error = std::forward<U>(error);
+        }
+        this->_status = result_status::failure;
+    }
+};
 
 template<typename T, typename E>
 class result_storage_base<T, E, std::enable_if_t<std::is_void_v<T>>, true>
@@ -156,6 +254,11 @@ public:
     /// Default constructor.
     constexpr result_storage_base() noexcept
         : _status(result_status::success)
+    {}
+
+    /// Constructs an object without initialization of value or error.
+    constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
+        : _status()
     {}
 
     /// Destructor.
@@ -177,6 +280,11 @@ public:
         : _status(result_status::success)
     {}
 
+    /// Constructs an object without initialization of value or error.
+    constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
+        : _status()
+    {}
+
     /// Destructor.
     constexpr ~result_storage_base() noexcept(std::is_nothrow_destructible_v<E>)
     {
@@ -196,7 +304,34 @@ public:
 template<typename T, typename E>
 class result_storage<T, E, std::enable_if_t<std::is_void_v<T>>>
     : public result_storage_base<T, E>
-{};
+{
+public:
+    using result_storage_base<T, E>::result_storage_base;
+
+    /// Constructs value from the specified value.
+    constexpr auto construct_value() noexcept -> void
+    {
+        this->_status = result_status::success;
+    }
+
+    /// Constructs error from the specified value.
+    /// @tparam U     Value type.
+    /// @param  error Value with which to initialize the contained error.
+    template<typename U>
+        requires std::is_constructible_v<E, U&&>
+    constexpr auto construct_error(U&& error) noexcept(std::is_nothrow_constructible_v<E, U&&>) -> void
+    {
+        if constexpr (!std::is_trivially_constructible_v<E, U&&>)
+        {
+            std::construct_at(std::addressof(this->_error), std::forward<U>(error));
+        }
+        else
+        {
+            this->_error = std::forward<U>(error);
+        }
+        this->_status = result_status::failure;
+    }
+};
 
 } // namespace detail
 } // namespace ext

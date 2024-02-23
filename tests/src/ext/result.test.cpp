@@ -19,10 +19,31 @@ TEST(ResultTests, DefaultConstruction)
     }
 
     {
-        // result<std::string&, int> r {};
+        result<const void, int> r {};
+    }
+}
+
+TEST(ResultTests, CopyConstruction)
+{
+    using namespace ext;
+
+    {
+        result<std::string, int> r1 {};
+        result<std::string, int> r2 { r1 };
     }
 
     {
-        result<const void, int> r {};
+        result<int, std::string> r1 {};
+        result<int, std::string> r2 { r1 };
+    }
+
+    {
+        result<void, int> r1 {};
+        result<void, int> r2 { r1 };
+    }
+
+    {
+        result<void, std::string> r1 {};
+        result<void, std::string> r2 { r1 };
     }
 }
