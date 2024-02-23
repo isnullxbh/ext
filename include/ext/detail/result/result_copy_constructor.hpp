@@ -95,7 +95,10 @@ public:
 template<typename T, typename E>
 class result_copy_constructor<T, E, false>
     : public result_copy_constructor_base<T, E>
-{};
+{
+public:
+    using result_copy_constructor_base<T, E>::result_copy_constructor_base;
+};
 
 } // namespace detail
 } // namespace ext

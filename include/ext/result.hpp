@@ -6,14 +6,14 @@
 
 #pragma once
 
-#include <ext/detail/result/result_copy_constructor.hpp>
+#include <ext/detail/result/result_move_constructor.hpp>
 
 namespace ext
 {
 
 template<typename T, typename E>
 class result
-    : private detail::result_copy_constructor<T, E>
+    : private detail::result_move_constructor<T, E>
 {
 public:
     /// Default constructor.
@@ -22,8 +22,19 @@ public:
     /// Copy constructor.
     result(const result&) = default;
 
+    /// Move constructor.
+    result(result&&) = default;
+
     /// Destructor.
     ~result() = default;
+
+    constexpr auto status() const noexcept -> result_status;
 };
+
+template<typename T, typename E>
+constexpr auto result<T, E>::status() const noexcept -> result_status
+{
+    return this->_status;
+}
 
 } // namespace ext
