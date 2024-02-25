@@ -25,8 +25,11 @@ enum class result_status : char8_t
 
 using failure_tag_t = std::integral_constant<result_status, result_status::failure>;
 
-template<typename E>
+template<typename>
 class failure;
+
+template<typename, typename>
+class result;
 
 namespace detail
 {
@@ -78,6 +81,13 @@ public:
         , _status(result_status::success)
     {}
 
+    template<typename U>
+        requires std::is_constructible_v<T, U&&>
+    constexpr explicit result_storage_base(U&& value) noexcept(std::is_nothrow_constructible_v<T, U&&>)
+        : _value(std::forward<U>(value))
+        , _status(result_status::success)
+    {}
+
     /// Constructs an object without initialization of value or error.
     constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
         : _status()
@@ -108,6 +118,13 @@ public:
     /// Constructs an object without initialization of value or error.
     constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
         : _status()
+    {}
+
+    template<typename U>
+        requires std::is_constructible_v<T, U&&>
+    constexpr explicit result_storage_base(U&& value) noexcept(std::is_nothrow_constructible_v<T, U&&>)
+        : _value(std::forward<U>(value))
+        , _status(result_status::success)
     {}
 
     /// Destructor.
@@ -188,6 +205,13 @@ public:
         : _status()
     {}
 
+    template<typename U>
+        requires std::is_convertible_v<U&, T&>
+    constexpr explicit result_storage_base(U& value) noexcept
+        : _value(std::addressof(value))
+        , _status(result_status::success)
+    {}
+
     /// Destructor.
     ~result_storage_base() = default;
 
@@ -209,6 +233,13 @@ public:
     /// Constructs an object without initialization of value or error.
     constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
         : _status()
+    {}
+
+    template<typename U>
+        requires std::is_convertible_v<U&, T&>
+    constexpr explicit result_storage_base(U& value) noexcept
+        : _value(std::addressof(value))
+        , _status(result_status::success)
     {}
 
     /// Destructor.

@@ -123,30 +123,67 @@ TEST(ResultTests, MoveConstruction)
     {
         result<std::string, int> r1 {};
         result<std::string, int> r2 { std::move(r1) };
+        EXPECT_EQ(r2.status(), result_status::success);
     }
 
     {
         result<int, std::string> r1 {};
         result<int, std::string> r2 { std::move(r1) };
+        EXPECT_EQ(r2.status(), result_status::success);
     }
 
     {
         result<std::string, std::string> r1 {};
         result<std::string, std::string> r2 { std::move(r1) };
+        EXPECT_EQ(r2.status(), result_status::success);
     }
 
     {
         result<int, int> r1 {};
         result<int, int> r2 { std::move(r1) };
+        EXPECT_EQ(r2.status(), result_status::success);
     }
 
     {
         result<void, int> r1 {};
         result<void, int> r2 { std::move(r1) };
+        EXPECT_EQ(r2.status(), result_status::success);
     }
 
     {
         result<void, std::string> r1 {};
         result<void, std::string> r2 { std::move(r1) };
+        EXPECT_EQ(r2.status(), result_status::success);
+    }
+}
+
+TEST(ResultTests, ConstructFromSingleArgument)
+{
+    using namespace ext;
+
+    {
+        result<int, std::string> r { 11 };
+        EXPECT_TRUE(r);
+        EXPECT_EQ(r.value(), 11);
+    }
+
+    {
+        result<std::string, int> r { "abc" };
+        EXPECT_TRUE(r);
+        EXPECT_EQ(r.value(), "abc");
+    }
+
+    {
+        auto value { 11 };
+        result<int&, std::string> r { value };
+        EXPECT_TRUE(r);
+        EXPECT_EQ(&r.value(), &value);
+    }
+
+    {
+        std::string value { "abc" };
+        result<std::string&, int> r { value };
+        EXPECT_TRUE(r);
+        EXPECT_EQ(&r.value(), &value);
     }
 }

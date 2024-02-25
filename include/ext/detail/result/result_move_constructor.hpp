@@ -35,6 +35,8 @@ class result_move_constructor
     : public result_copy_constructor<T, E>
 {
 public:
+    using result_copy_constructor<T, E>::result_copy_constructor;
+
     /// Move constructor.
     result_move_constructor() = default;
 };
@@ -44,6 +46,8 @@ class result_move_constructor_base
     : public result_copy_constructor<T, E>
 {
 public:
+    using result_copy_constructor<T, E>::result_copy_constructor;
+
     /// Default constructor.
     result_move_constructor_base() = default;
 
@@ -68,6 +72,8 @@ class result_move_constructor_base<T&, E>
     : public result_copy_constructor<T&, E>
 {
 public:
+    using result_copy_constructor<T&, E>::result_copy_constructor;
+
     /// Move constructor.
     constexpr result_move_constructor_base(result_move_constructor_base&& rhs)
         noexcept(std::is_nothrow_move_constructible_v<E>)
@@ -106,7 +112,10 @@ public:
 template<typename T, typename E>
 class result_move_constructor<T, E, false>
     : public result_move_constructor_base<T, E>
-{};
+{
+public:
+    using result_move_constructor_base<T, E>::result_move_constructor_base;
+};
 
 } // namespace detail
 } // namespace ext
