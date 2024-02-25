@@ -24,6 +24,7 @@ enum class result_status : char8_t
 };
 
 using failure_tag_t = std::integral_constant<result_status, result_status::failure>;
+constexpr inline failure_tag_t failure_tag {};
 
 template<typename>
 class failure;
@@ -88,6 +89,14 @@ public:
         , _status(result_status::success)
     {}
 
+    template<typename... Args>
+        requires std::is_constructible_v<E, Args&&...>
+    constexpr explicit result_storage_base(failure_tag_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
+        : _error(std::forward<Args>(args)...)
+        , _status(result_status::failure)
+    {}
+
     /// Constructs an object without initialization of value or error.
     constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
         : _status()
@@ -125,6 +134,14 @@ public:
     constexpr explicit result_storage_base(U&& value) noexcept(std::is_nothrow_constructible_v<T, U&&>)
         : _value(std::forward<U>(value))
         , _status(result_status::success)
+    {}
+
+    template<typename... Args>
+        requires std::is_constructible_v<E, Args&&...>
+    constexpr explicit result_storage_base(failure_tag_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
+        : _error(std::forward<Args>(args)...)
+        , _status(result_status::failure)
     {}
 
     /// Destructor.
@@ -212,6 +229,14 @@ public:
         , _status(result_status::success)
     {}
 
+    template<typename... Args>
+        requires std::is_constructible_v<E, Args&&...>
+    constexpr explicit result_storage_base(failure_tag_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
+        : _error(std::forward<Args>(args)...)
+        , _status(result_status::failure)
+    {}
+
     /// Destructor.
     ~result_storage_base() = default;
 
@@ -240,6 +265,14 @@ public:
     constexpr explicit result_storage_base(U& value) noexcept
         : _value(std::addressof(value))
         , _status(result_status::success)
+    {}
+
+    template<typename... Args>
+        requires std::is_constructible_v<E, Args&&...>
+    constexpr explicit result_storage_base(failure_tag_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
+        : _error(std::forward<Args>(args)...)
+        , _status(result_status::failure)
     {}
 
     /// Destructor.
@@ -310,6 +343,14 @@ public:
         : _status()
     {}
 
+    template<typename... Args>
+        requires std::is_constructible_v<E, Args&&...>
+    constexpr explicit result_storage_base(failure_tag_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
+        : _error(std::forward<Args>(args)...)
+        , _status(result_status::failure)
+    {}
+
     /// Destructor.
     ~result_storage_base() = default;
 
@@ -332,6 +373,14 @@ public:
     /// Constructs an object without initialization of value or error.
     constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
         : _status()
+    {}
+
+    template<typename... Args>
+        requires std::is_constructible_v<E, Args&&...>
+    constexpr explicit result_storage_base(failure_tag_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
+        : _error(std::forward<Args>(args)...)
+        , _status(result_status::failure)
     {}
 
     /// Destructor.

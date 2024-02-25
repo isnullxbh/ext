@@ -91,6 +91,8 @@ class result_move_constructor_base<T, E, std::enable_if_t<std::is_void_v<T>>>
     : public result_copy_constructor<T, E>
 {
 public:
+    using result_copy_constructor<T, E>::result_copy_constructor;
+
     /// Default constructor.
     result_move_constructor_base() = default;
 

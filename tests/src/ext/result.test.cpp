@@ -161,6 +161,7 @@ TEST(ResultTests, ConstructFromSingleArgument)
 {
     using namespace ext;
 
+    // Value-based
     {
         result<int, std::string> r { 11 };
         EXPECT_TRUE(r);
@@ -185,5 +186,42 @@ TEST(ResultTests, ConstructFromSingleArgument)
         result<std::string&, int> r { value };
         EXPECT_TRUE(r);
         EXPECT_EQ(&r.value(), &value);
+    }
+
+    // Error-based
+    {
+        result<int, std::string> r { failure_tag, "abc" };
+        EXPECT_FALSE(r);
+        EXPECT_EQ(r.error(), "abc");
+    }
+
+    {
+        result<std::string, int> r { failure_tag, 11 };
+        EXPECT_FALSE(r);
+        EXPECT_EQ(r.error(), 11);
+    }
+
+    {
+        result<int&, std::string> r { failure_tag, "abc" };
+        EXPECT_FALSE(r);
+        EXPECT_EQ(r.error(), "abc");
+    }
+
+    {
+        result<std::string&, int> r { failure_tag, 11 };
+        EXPECT_FALSE(r);
+        EXPECT_EQ(r.error(), 11);
+    }
+
+    {
+        result<void, std::string> r { failure_tag, "abc" };
+        EXPECT_FALSE(r);
+        EXPECT_EQ(r.error(), "abc");
+    }
+
+    {
+        result<void, int> r { failure_tag, 11 };
+        EXPECT_FALSE(r);
+        EXPECT_EQ(r.error(), 11);
     }
 }

@@ -65,6 +65,9 @@ template<typename T, typename E>
 class result
     : private detail::result_move_constructor<T, E>
 {
+    static_assert(!std::is_void_v<E> && !std::is_reference_v<E> && !std::is_array_v<E>,
+        "E must not be a reference, array or void type");
+
 private:
     using base = detail::result_move_constructor<T, E>;
 
@@ -108,6 +111,13 @@ public:
               && (!std::is_same_v<std::remove_cvref_t<U>, failure_tag_t>)
     constexpr explicit (!std::is_convertible_v<U&, std::add_lvalue_reference_t<T>>) result(U& value) noexcept;
 
+    /// Constructs an object that contains an error, initialized with the specified arguments.
+    /// @tparam Args Values type.
+    /// @param  args Values with which to initialize the contained error.
+    template<typename... Args>
+        requires std::is_constructible_v<E, Args&&...>
+    constexpr explicit result(failure_tag_t, Args&&... args) noexcept(std::is_nothrow_constructible_v<E, Args&&...>);
+
     /// Destructor.
     ~result() = default;
 
@@ -130,6 +140,22 @@ public:
     /// Gets the value contained in the result.
     /// @return A reference to the contained value.
     constexpr auto value() const && -> std::add_rvalue_reference_t<const std::remove_reference_t<T>>;
+
+    /// Gets the error contained in the result.
+    /// @return A reference to the contained error.
+    constexpr auto error() & -> E&;
+
+    /// Gets the error contained in the result.
+    /// @return A reference to the contained error.
+    constexpr auto error() const & -> const E&;
+
+    /// Gets the error contained in the result.
+    /// @return A reference to the contained error.
+    constexpr auto error() && -> E&&;
+
+    /// Gets the error contained in the result.
+    /// @return A reference to the contained error.
+    constexpr auto error() const && -> const E&&;
 
     /// Checks whether the result is success.
     /// @return If result contains a value - true, otherwise - false.
@@ -161,6 +187,13 @@ template<typename U>
           && (!std::is_same_v<std::remove_cvref_t<U>, failure_tag_t>)
 constexpr result<T, E>::result(U& value) noexcept
     : base(value)
+{}
+
+template<typename T, typename E>
+template<typename... Args>
+    requires std::is_constructible_v<E, Args&&...>
+constexpr result<T, E>::result(failure_tag_t tag, Args&&... args) noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
+    : base(tag, std::forward<Args>(args)...)
 {}
 
 template<typename T, typename E>
@@ -255,6 +288,46 @@ constexpr auto result<T, E>::value() const && -> std::add_rvalue_reference_t<con
     {
         return std::move(this->_value);
     }
+}
+
+template<typename T, typename E>
+constexpr auto result<T, E>::error() & -> E&
+{
+    if (*this)
+    {
+        throw bad_result_access<E>();
+    }
+    return this->_error;
+}
+
+template<typename T, typename E>
+constexpr auto result<T, E>::error() const & -> const E&
+{
+    if (*this)
+    {
+        throw bad_result_access<E>();
+    }
+    return this->_error;
+}
+
+template<typename T, typename E>
+constexpr auto result<T, E>::error() && -> E&&
+{
+    if (*this)
+    {
+        throw bad_result_access<E>();
+    }
+    return std::move(this->_error);
+}
+
+template<typename T, typename E>
+constexpr auto result<T, E>::error() const && -> const E&&
+{
+    if (*this)
+    {
+        throw bad_result_access<E>();
+    }
+    return std::move(this->_error);
 }
 
 template<typename T, typename E>
