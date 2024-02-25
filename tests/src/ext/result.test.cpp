@@ -10,6 +10,42 @@
 
 #include <ext/result.hpp>
 
+TEST(ResultTests, FailureCTADs)
+{
+    using namespace ext;
+
+    {
+        int value {};
+        failure f { value };
+        static_assert(std::is_same_v<failure<int>, decltype(f)>);
+    }
+
+    {
+        const int value {};
+        failure f { value };
+        static_assert(std::is_same_v<failure<const int>, decltype(f)>);
+    }
+
+    {
+        volatile int value {};
+        failure f { static_cast<volatile int&&>(value) };
+        static_assert(std::is_same_v<failure<volatile int>, decltype(f)>);
+    }
+}
+
+TEST(ResultTests, IsFailure)
+{
+    using namespace ext;
+
+    static_assert(is_failure_v<failure<int>>);
+    static_assert(is_failure_v<const failure<int>>);
+    static_assert(is_failure_v<failure<int>, ignore>);
+    static_assert(is_failure_v<failure<int>, int>);
+
+    static_assert(!is_failure_v<failure<int>&>);
+    static_assert(!is_failure_v<failure<int>, char>);
+}
+
 TEST(ResultTests, DefaultConstruction)
 {
     using namespace ext;

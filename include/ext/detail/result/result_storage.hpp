@@ -9,6 +9,8 @@
 #include <type_traits>
 #include <utility>
 
+#include <ext/ignore.hpp>
+
 namespace ext
 {
 
@@ -21,6 +23,11 @@ enum class result_status : char8_t
     success  ///< Indicates that the result contains a value.
 };
 
+using failure_tag_t = std::integral_constant<result_status, result_status::failure>;
+
+template<typename E>
+class failure;
+
 namespace detail
 {
 
@@ -30,6 +37,16 @@ namespace result_helpers
 struct skip_init {};
 
 } // namespace result_helpers
+
+template<typename, typename>
+struct is_failure : std::false_type
+{};
+
+template<typename Ecur, typename Eexp>
+struct is_failure<failure<Ecur>, Eexp>
+    : std::disjunction<std::is_same<Eexp, ignore>,
+                       std::is_same<Ecur, Eexp>>
+{};
 
 template<typename T, typename E, typename = void>
 struct result_trivially_destructible
