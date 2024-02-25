@@ -52,7 +52,7 @@ public:
     constexpr result_copy_constructor_base(const result_copy_constructor_base& rhs)
         : result_storage<T, E>(result_helpers::skip_init())
     {
-        this->_status == result_status::success
+        rhs._status == result_status::success
             ? this->construct_value(rhs._value)
             : this->construct_error(rhs._error);
     }
@@ -69,7 +69,7 @@ public:
     constexpr result_copy_constructor_base(const result_copy_constructor_base& rhs)
         : result_storage<T&, E>(result_helpers::skip_init())
     {
-        this->_status == result_status::success
+        rhs._status == result_status::success
             ? this->construct_value(rhs._value)
             : this->construct_error(rhs._error);
     }
@@ -86,7 +86,7 @@ public:
     constexpr result_copy_constructor_base(const result_copy_constructor_base& rhs)
         : result_storage<T, E>(result_helpers::skip_init())
     {
-        this->_status == result_status::success
+        rhs._status == result_status::success
             ? this->construct_value()
             : this->construct_error(rhs._error);
     }
