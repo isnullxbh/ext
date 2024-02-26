@@ -386,3 +386,50 @@ TEST(ResultTests, ConvertingMoveConstructor)
         EXPECT_EQ(r2.error(), 11);
     }
 }
+
+TEST(ResultTests, ConstructFromFailure)
+{
+    using namespace ext;
+
+    {
+        failure<std::string>     f { "abc" };
+        result<int, std::string> r { f };
+        ASSERT_FALSE(r);
+        EXPECT_EQ(r.error(), f.value());
+    }
+
+    {
+        failure<std::string>      f { "abc" };
+        result<int&, std::string> r { f };
+        ASSERT_FALSE(r);
+        EXPECT_EQ(r.error(), f.value());
+    }
+
+    {
+        failure<std::string>      f { "abc" };
+        result<void, std::string> r { f };
+        ASSERT_FALSE(r);
+        EXPECT_EQ(r.error(), f.value());
+    }
+
+    {
+        failure<std::string>     f { "abc" };
+        result<int, std::string> r { std::move(f) };
+        ASSERT_FALSE(r);
+        EXPECT_EQ(r.error(), "abc");
+    }
+
+    {
+        failure<std::string>      f { "abc" };
+        result<int&, std::string> r { std::move(f) };
+        ASSERT_FALSE(r);
+        EXPECT_EQ(r.error(), "abc");
+    }
+
+    {
+        failure<std::string>      f { "abc" };
+        result<void, std::string> r { std::move(f) };
+        ASSERT_FALSE(r);
+        EXPECT_EQ(r.error(), "abc");
+    }
+}

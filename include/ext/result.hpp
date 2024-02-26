@@ -190,6 +190,22 @@ public:
     constexpr explicit(!std::is_convertible_v<U, T> || !std::is_convertible_v<V&&, E>)
         result(result<U, V>&& rhs);
 
+    /// Constructs an object that contains an error, initialized by failure value.
+    /// @tparam U   Failure value type.
+    /// @param  rhs Failure object.
+    template<typename U>
+        requires std::is_constructible_v<E, const U&>
+    constexpr explicit(!std::is_convertible_v<const U&, E>) result(const failure<U>& rhs)
+        noexcept(std::is_nothrow_constructible_v<E, const U&>);
+
+    /// Constructs an object that contains an error, initialized by failure value.
+    /// @tparam U   Failure value type.
+    /// @param  rhs Failure object.
+    template<typename U>
+        requires std::is_constructible_v<E, U&&>
+    constexpr explicit(!std::is_convertible_v<U&&, E>) result(failure<U>&& rhs)
+        noexcept(std::is_nothrow_constructible_v<E, U&&>);
+
     /// Destructor.
     ~result() = default;
 
@@ -354,6 +370,20 @@ constexpr result<T, E>::result(result<U, V>&& rhs)
     rhs ? this->construct_value(*rhs._value) // TODO
         : this->construct_error(std::move(rhs).error());
 }
+
+template<typename T, typename E>
+template<typename U>
+    requires std::is_constructible_v<E, const U&>
+constexpr result<T, E>::result(const failure<U>& rhs) noexcept(std::is_nothrow_constructible_v<E, const U&>)
+    : base(failure_tag, rhs.value())
+{}
+
+template<typename T, typename E>
+template<typename U>
+    requires std::is_constructible_v<E, U&&>
+constexpr result<T, E>::result(failure<U>&& rhs) noexcept(std::is_nothrow_constructible_v<E, U&&>)
+    : base(failure_tag, std::move(rhs).value())
+{}
 
 template<typename T, typename E>
 constexpr auto result<T, E>::status() const noexcept -> result_status
