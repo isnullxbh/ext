@@ -12,6 +12,7 @@ target_sources(ext
             BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../include
             FILES
                 ${CMAKE_CURRENT_SOURCE_DIR}/../include/ext/detail/common.hpp
+                ${CMAKE_CURRENT_SOURCE_DIR}/../include/ext/detail/doxygen.hpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/../include/ext/detail/fixed_string.hpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/../include/ext/detail/indexed.hpp
                 ${CMAKE_CURRENT_SOURCE_DIR}/../include/ext/detail/result_copy_constructor.hpp

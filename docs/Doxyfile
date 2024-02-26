@@ -175,7 +175,7 @@ RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
-EXCLUDE_SYMBOLS        =
+EXCLUDE_SYMBOLS        = EXT_DOXYGEN_IGNORE*
 EXAMPLE_PATH           =
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
@@ -342,7 +342,7 @@ INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
 PREDEFINED             =
 EXPAND_AS_DEFINED      =
-SKIP_FUNCTION_MACROS   = YES
+SKIP_FUNCTION_MACROS   = NO
 #---------------------------------------------------------------------------
 # Configuration options related to external references
 #---------------------------------------------------------------------------

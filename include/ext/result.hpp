@@ -9,10 +9,11 @@
 #include <exception>
 
 #include <ext/detail/common.hpp>
+#include <ext/detail/doxygen.hpp>
 #include <ext/detail/result/result_move_constructor.hpp>
 #include <ext/value_wrapper.hpp>
 
-/// @defgroup ext-utility-result
+/// @defgroup ext-utility-result ext::result
 /// @ingroup  ext-utility
 
 namespace ext
@@ -62,6 +63,11 @@ struct is_failure
 template<typename T, typename E = ignore>
 constexpr inline auto is_failure_v = is_failure<T, E>::value;
 
+/// Represents either success (value) or failure (error).
+/// @tparam  T Value type.
+/// @tparam  E Error type.
+/// @ingroup ext-utility-result
+/// @since   0.1.0
 template<typename T, typename E>
 class result
     : private detail::result_move_constructor<T, E>
@@ -98,7 +104,7 @@ public:
               && (!std::is_same_v<std::remove_cvref_t<U>, result<T, E>>)
               && (!std::is_same_v<std::remove_cvref_t<U>, std::in_place_t>)
               && (!std::is_same_v<std::remove_cvref_t<U>, failure_tag_t>)
-    constexpr explicit(!std::is_convertible_v<U&&, T>) result(U&& value)
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<U&&, T>)) result(U&& value)
         noexcept(std::is_nothrow_constructible_v<T, U&&>);
 
     /// Constructs an object that contains a value, initialized with the specified value.
@@ -112,7 +118,8 @@ public:
               && (!std::is_same_v<std::remove_cvref_t<U>, result<T, E>>)
               && (!std::is_same_v<std::remove_cvref_t<U>, std::in_place_t>)
               && (!std::is_same_v<std::remove_cvref_t<U>, failure_tag_t>)
-    constexpr explicit (!std::is_convertible_v<U&, std::add_lvalue_reference_t<T>>) result(U& value) noexcept;
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<U&, std::add_lvalue_reference_t<T>>))
+        result(U& value) noexcept;
 
     /// Constructs an object that contains an error, initialized with the specified arguments.
     /// @tparam Args Values type.
@@ -146,8 +153,8 @@ public:
                    std::is_constructible_v<T, std::add_lvalue_reference_t<const std::remove_reference_t<U>>>)
               && std::is_constructible_v<E, const V&>
               && (!detail::converts_from_any_cvref_v<T, result<U, V>>)
-    constexpr explicit(!std::is_convertible_v<std::add_lvalue_reference_t<const U>, T> ||
-                       !std::is_convertible_v<const V&, E>)
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<std::add_lvalue_reference_t<const U>, T> ||
+                                          !std::is_convertible_v<const V&, E>))
         result(const result<U, V>& rhs);
 
     /// Converting move constructor.
@@ -160,8 +167,8 @@ public:
                    std::is_constructible_v<T, std::add_rvalue_reference_t<std::remove_reference_t<U>>>)
               && std::is_constructible_v<E, V&&>
               && (!detail::converts_from_any_cvref_v<T, result<U, V>>)
-    constexpr explicit(!std::is_convertible_v<std::add_rvalue_reference_t<U>, T> ||
-                       !std::is_convertible_v<V&&, E>)
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<std::add_rvalue_reference_t<U>, T> ||
+                                          !std::is_convertible_v<V&&, E>))
         result(result<U, V>&& rhs);
 
     /// Converting copy constructor.
@@ -174,7 +181,7 @@ public:
               && std::is_reference_v<U>
               && std::is_convertible_v<U, T>
               && std::is_constructible_v<E, const V&>
-    constexpr explicit(!std::is_convertible_v<U, T> || !std::is_convertible_v<const V&, E>)
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<U, T> || !std::is_convertible_v<const V&, E>))
         result(const result<U, V>& rhs);
 
     /// Converting move constructor.
@@ -187,7 +194,7 @@ public:
               && std::is_reference_v<U>
               && std::is_convertible_v<U, T>
               && std::is_constructible_v<E, V&&>
-    constexpr explicit(!std::is_convertible_v<U, T> || !std::is_convertible_v<V&&, E>)
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<U, T> || !std::is_convertible_v<V&&, E>))
         result(result<U, V>&& rhs);
 
     /// Constructs an object that contains an error, initialized by failure value.
@@ -195,7 +202,7 @@ public:
     /// @param  rhs Failure object.
     template<typename U>
         requires std::is_constructible_v<E, const U&>
-    constexpr explicit(!std::is_convertible_v<const U&, E>) result(const failure<U>& rhs)
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<const U&, E>) result(const failure<U>& rhs))
         noexcept(std::is_nothrow_constructible_v<E, const U&>);
 
     /// Constructs an object that contains an error, initialized by failure value.
@@ -203,7 +210,7 @@ public:
     /// @param  rhs Failure object.
     template<typename U>
         requires std::is_constructible_v<E, U&&>
-    constexpr explicit(!std::is_convertible_v<U&&, E>) result(failure<U>&& rhs)
+    constexpr EXT_DOXYGEN_IGNORE(explicit(!std::is_convertible_v<U&&, E>) result(failure<U>&& rhs))
         noexcept(std::is_nothrow_constructible_v<E, U&&>);
 
     /// Destructor.
