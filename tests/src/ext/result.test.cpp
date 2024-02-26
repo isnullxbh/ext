@@ -5,6 +5,7 @@
  */
 
 #include <string>
+#include <string_view>
 
 #include <gtest/gtest.h>
 
@@ -253,5 +254,135 @@ TEST(ResultTests, ConstructValueInPlace)
     {
         result<void, int> r { std::in_place };
         EXPECT_TRUE(r);
+    }
+}
+
+TEST(ResultTests, ConvertingCopyConstructor)
+{
+    using namespace ext;
+
+    struct A {};
+    struct B : A {};
+
+    {
+        result<std::string_view, int> r1 { "abc" };
+        result<std::string, int>      r2 { r1 };
+        ASSERT_EQ(r1.status(), r2.status());
+        EXPECT_EQ(r1.value(), r2.value());
+    }
+
+    {
+        result<int, std::string_view> r1 { failure_tag, "abc" };
+        result<int, std::string>      r2 { r1 };
+        ASSERT_EQ(r1.status(), r2.status());
+        EXPECT_EQ(r1.error(), r2.error());
+    }
+
+    {
+        result<void, std::string_view> r1 {};
+        result<void, std::string>      r2 { r1 };
+        EXPECT_TRUE(r2);
+    }
+
+    {
+        result<void, std::string_view> r1 { failure_tag, "abc" };
+        result<void, std::string>      r2 { r1 };
+        ASSERT_EQ(r1.status(), r2.status());
+        EXPECT_EQ(r1.error(), r2.error());
+    }
+
+    {
+        B value {};
+        result<B&, int> r1 { value };
+        result<A&, int> r2 { r1 };
+        ASSERT_EQ(r1.status(), r2.status());
+        EXPECT_EQ(&r1.value(), &r2.value());
+    }
+
+    {
+        B value {};
+        result<B&, int>       r1 { value };
+        result<const A&, int> r2 { r1 };
+        ASSERT_EQ(r1.status(), r2.status());
+        EXPECT_EQ(&r1.value(), &r2.value());
+    }
+
+    {
+        result<B&, int> r1 { failure_tag, 11 };
+        result<A&, int> r2 { r1 };
+        ASSERT_EQ(r1.status(), r2.status());
+        EXPECT_EQ(r1.error(), r2.error());
+    }
+
+    {
+        result<B&, int>       r1 { failure_tag, 11 };
+        result<const A&, int> r2 { r1 };
+        ASSERT_EQ(r1.status(), r2.status());
+        EXPECT_EQ(r1.error(), r2.error());
+    }
+}
+
+TEST(ResultTests, ConvertingMoveConstructor)
+{
+    using namespace ext;
+
+    struct A {};
+    struct B : A {};
+
+    {
+        result<std::string_view, int> r1 { "abc" };
+        result<std::string, int>      r2 { std::move(r1) };
+        ASSERT_EQ(r2.status(), result_status::success);
+        EXPECT_EQ(r2.value(), "abc");
+    }
+
+    {
+        result<int, std::string_view> r1 { failure_tag, "abc" };
+        result<int, std::string>      r2 { std::move(r1) };
+        ASSERT_EQ(r2.status(), result_status::failure);
+        EXPECT_EQ(r2.error(), "abc");
+    }
+
+    {
+        result<void, std::string_view> r1 {};
+        result<void, std::string>      r2 { std::move(r1) };
+        EXPECT_TRUE(r2);
+    }
+
+    {
+        result<void, std::string_view> r1 { failure_tag, "abc" };
+        result<void, std::string>      r2 { std::move(r1) };
+        ASSERT_EQ(r2.status(), result_status::failure);
+        EXPECT_EQ(r2.error(), "abc");
+    }
+
+    {
+        B value {};
+        result<B&, int> r1 { value };
+        result<A&, int> r2 { std::move(r1) };
+        ASSERT_EQ(r2.status(), result_status::success);
+        EXPECT_EQ(&r2.value(), &value);
+    }
+
+    {
+        B value {};
+        result<B&, int>       r1 { value };
+        result<const A&, int> r2 { std::move(r1) };
+        ASSERT_EQ(r2.status(), result_status::success);
+        EXPECT_EQ(&r2.value(), &value);
+    }
+
+    {
+        result<B&, int> r1 { failure_tag, 11 };
+        result<A&, int> r2 { std::move(r1) };
+        ASSERT_EQ(r2.status(), result_status::failure);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    {
+        result<B&, int>       r1 { failure_tag, 11 };
+        result<const A&, int> r2 { std::move(r1) };
+        ASSERT_EQ(r2.status(), result_status::failure);
+        EXPECT_EQ(r2.error(), 11);
     }
 }

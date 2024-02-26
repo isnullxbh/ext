@@ -8,6 +8,7 @@
 
 #include <exception>
 
+#include <ext/detail/common.hpp>
 #include <ext/detail/result/result_move_constructor.hpp>
 #include <ext/value_wrapper.hpp>
 
@@ -65,6 +66,8 @@ template<typename T, typename E>
 class result
     : private detail::result_move_constructor<T, E>
 {
+    static_assert(!std::is_rvalue_reference_v<T> && !std::is_array_v<T>,
+        "T must not be a rvalue-reference or array type");
     static_assert(!std::is_void_v<E> && !std::is_reference_v<E> && !std::is_array_v<E>,
         "E must not be a reference, array or void type");
 
@@ -133,6 +136,60 @@ public:
     constexpr explicit result(std::in_place_t tag) noexcept
         requires std::is_void_v<T>;
 
+    /// Converting copy constructor.
+    /// @tparam U   Value type of the original result.
+    /// @tparam V   Error type of the original result.
+    /// @param  rhs Original result.
+    template<typename U, typename V>
+        requires (!std::is_reference_v<T>)
+              && ((std::is_void_v<T> && std::is_void_v<U>) ||
+                   std::is_constructible_v<T, std::add_lvalue_reference_t<const std::remove_reference_t<U>>>)
+              && std::is_constructible_v<E, const V&>
+              && (!detail::converts_from_any_cvref_v<T, result<U, V>>)
+    constexpr explicit(!std::is_convertible_v<std::add_lvalue_reference_t<const U>, T> ||
+                       !std::is_convertible_v<const V&, E>)
+        result(const result<U, V>& rhs);
+
+    /// Converting move constructor.
+    /// @tparam U   Value type of the original result.
+    /// @tparam V   Error type of the original result.
+    /// @param  rhs Original result.
+    template<typename U, typename V>
+        requires (!std::is_reference_v<T>)
+              && ((std::is_void_v<T> && std::is_void_v<U>) ||
+                   std::is_constructible_v<T, std::add_rvalue_reference_t<std::remove_reference_t<U>>>)
+              && std::is_constructible_v<E, V&&>
+              && (!detail::converts_from_any_cvref_v<T, result<U, V>>)
+    constexpr explicit(!std::is_convertible_v<std::add_rvalue_reference_t<U>, T> ||
+                       !std::is_convertible_v<V&&, E>)
+        result(result<U, V>&& rhs);
+
+    /// Converting copy constructor.
+    /// This constructor does not participate in overload resolution unless T and U are reference types.
+    /// @tparam U   Value type of the original result.
+    /// @tparam V   Error type of the original result.
+    /// @param  rhs Original result.
+    template<typename U, typename V>
+        requires std::is_reference_v<T>
+              && std::is_reference_v<U>
+              && std::is_convertible_v<U, T>
+              && std::is_constructible_v<E, const V&>
+    constexpr explicit(!std::is_convertible_v<U, T> || !std::is_convertible_v<const V&, E>)
+        result(const result<U, V>& rhs);
+
+    /// Converting move constructor.
+    /// This constructor does not participate in overload resolution unless T and U are reference types.
+    /// @tparam U   Value type of the original result.
+    /// @tparam V   Error type of the original result.
+    /// @param  rhs Original result.
+    template<typename U, typename V>
+        requires std::is_reference_v<T>
+              && std::is_reference_v<U>
+              && std::is_convertible_v<U, T>
+              && std::is_constructible_v<E, V&&>
+    constexpr explicit(!std::is_convertible_v<U, T> || !std::is_convertible_v<V&&, E>)
+        result(result<U, V>&& rhs);
+
     /// Destructor.
     ~result() = default;
 
@@ -175,6 +232,9 @@ public:
     /// Checks whether the result is success.
     /// @return If result contains a value - true, otherwise - false.
     constexpr explicit operator bool() const noexcept;
+
+    template<typename U, typename V>
+    friend class result;
 };
 
 template<typename T, typename E>
@@ -224,6 +284,76 @@ template<typename T, typename E>
 constexpr result<T, E>::result(std::in_place_t tag) noexcept requires std::is_void_v<T>
     : base(tag)
 {}
+
+template<typename T, typename E>
+template<typename U, typename V>
+    requires (!std::is_reference_v<T>)
+          && ((std::is_void_v<T> && std::is_void_v<U>) ||
+               std::is_constructible_v<T, std::add_lvalue_reference_t<const std::remove_reference_t<U>>>)
+          && std::is_constructible_v<E, const V&>
+          && (!detail::converts_from_any_cvref_v<T, result<U, V>>)
+constexpr result<T, E>::result(const result<U, V>& rhs)
+    : base(detail::result_helpers::skip_init())
+{
+    if constexpr (!std::is_void_v<T>)
+    {
+        rhs ? this->construct_value(rhs.value())
+            : this->construct_error(rhs.error());
+    }
+    else
+    {
+        rhs ? this->construct_value()
+            : this->construct_error(rhs.error());
+    }
+}
+
+template<typename T, typename E>
+template<typename U, typename V>
+    requires (!std::is_reference_v<T>)
+          && ((std::is_void_v<T> && std::is_void_v<U>) ||
+               std::is_constructible_v<T, std::add_rvalue_reference_t<std::remove_reference_t<U>>>)
+          && std::is_constructible_v<E, V&&>
+          && (!detail::converts_from_any_cvref_v<T, result<U, V>>)
+constexpr result<T, E>::result(result<U, V>&& rhs)
+    : base(detail::result_helpers::skip_init())
+{
+    if constexpr (!std::is_void_v<T>)
+    {
+        rhs ? this->construct_value(std::move(rhs).value())
+            : this->construct_error(std::move(rhs).error());
+    }
+    else
+    {
+        rhs ? this->construct_value()
+            : this->construct_error(std::move(rhs).error());
+    }
+}
+
+template<typename T, typename E>
+template<typename U, typename V>
+    requires std::is_reference_v<T>
+          && std::is_reference_v<U>
+          && std::is_convertible_v<U, T>
+          && std::is_constructible_v<E, const V&>
+constexpr result<T, E>::result(const result<U, V>& rhs)
+    : base(detail::result_helpers::skip_init())
+{
+    rhs ? this->construct_value(*rhs._value) // TODO
+        : this->construct_error(rhs.error());
+}
+
+template<typename T, typename E>
+template<typename U, typename V>
+    requires std::is_reference_v<T>
+          && std::is_reference_v<U>
+          && std::is_convertible_v<U, T>
+          && std::is_constructible_v<E, V&&>
+constexpr result<T, E>::result(result<U, V>&& rhs)
+    : base(detail::result_helpers::skip_init())
+{
+    rhs ? this->construct_value(*rhs._value) // TODO
+        : this->construct_error(std::move(rhs).error());
+}
 
 template<typename T, typename E>
 constexpr auto result<T, E>::status() const noexcept -> result_status
