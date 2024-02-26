@@ -118,6 +118,21 @@ public:
         requires std::is_constructible_v<E, Args&&...>
     constexpr explicit result(failure_tag_t, Args&&... args) noexcept(std::is_nothrow_constructible_v<E, Args&&...>);
 
+    /// Constructs an object that contains a value, initialized from the specified arguments.
+    /// @tparam Args Argument types.
+    /// @param  tag  Indicates that value will be constructed in place.
+    /// @param  args Values with which to initialize the contained value.
+    template<typename... Args>
+        requires (!std::is_void_v<T>)
+              && std::is_constructible_v<T, Args&&...>
+    constexpr explicit result(std::in_place_t tag, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<T, Args&&...>);
+
+    /// Constructs an object with status "success".
+    /// @param tag Indicates that value will be constructed in place.
+    constexpr explicit result(std::in_place_t tag) noexcept
+        requires std::is_void_v<T>;
+
     /// Destructor.
     ~result() = default;
 
@@ -194,6 +209,20 @@ template<typename... Args>
     requires std::is_constructible_v<E, Args&&...>
 constexpr result<T, E>::result(failure_tag_t tag, Args&&... args) noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
     : base(tag, std::forward<Args>(args)...)
+{}
+
+template<typename T, typename E>
+template<typename... Args>
+    requires (!std::is_void_v<T>)
+         && std::is_constructible_v<T, Args&&...>
+constexpr result<T, E>::result(std::in_place_t tag, Args&&... args)
+    noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
+    : base(tag, std::forward<Args>(args)...)
+{}
+
+template<typename T, typename E>
+constexpr result<T, E>::result(std::in_place_t tag) noexcept requires std::is_void_v<T>
+    : base(tag)
 {}
 
 template<typename T, typename E>

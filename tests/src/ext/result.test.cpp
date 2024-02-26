@@ -157,11 +157,10 @@ TEST(ResultTests, MoveConstruction)
     }
 }
 
-TEST(ResultTests, ConstructFromSingleArgument)
+TEST(ResultTests, ConstructValue)
 {
     using namespace ext;
 
-    // Value-based
     {
         result<int, std::string> r { 11 };
         EXPECT_TRUE(r);
@@ -187,12 +186,16 @@ TEST(ResultTests, ConstructFromSingleArgument)
         EXPECT_TRUE(r);
         EXPECT_EQ(&r.value(), &value);
     }
+}
 
-    // Error-based
+TEST(ResultTests, ConstructErrorInPlace)
+{
+    using namespace ext;
+
     {
-        result<int, std::string> r { failure_tag, "abc" };
+        result<int, std::string> r { failure_tag, 3U, 'x' };
         EXPECT_FALSE(r);
-        EXPECT_EQ(r.error(), "abc");
+        EXPECT_EQ(r.error(), "xxx");
     }
 
     {
@@ -202,9 +205,9 @@ TEST(ResultTests, ConstructFromSingleArgument)
     }
 
     {
-        result<int&, std::string> r { failure_tag, "abc" };
+        result<int&, std::string> r { failure_tag, 3U, 'x' };
         EXPECT_FALSE(r);
-        EXPECT_EQ(r.error(), "abc");
+        EXPECT_EQ(r.error(), "xxx");
     }
 
     {
@@ -214,14 +217,41 @@ TEST(ResultTests, ConstructFromSingleArgument)
     }
 
     {
-        result<void, std::string> r { failure_tag, "abc" };
+        result<void, std::string> r { failure_tag, 3U, 'x' };
         EXPECT_FALSE(r);
-        EXPECT_EQ(r.error(), "abc");
+        EXPECT_EQ(r.error(), "xxx");
     }
 
     {
         result<void, int> r { failure_tag, 11 };
         EXPECT_FALSE(r);
         EXPECT_EQ(r.error(), 11);
+    }
+}
+
+TEST(ResultTests, ConstructValueInPlace)
+{
+    using namespace ext;
+
+    {
+        result<int, std::string> r { std::in_place, 11 };
+        EXPECT_TRUE(r);
+        EXPECT_EQ(r.value(), 11);
+    }
+
+    {
+        result<std::string, int> r { std::in_place, 3U, 'x' };
+        EXPECT_TRUE(r);
+        EXPECT_EQ(r.value(), "xxx");
+    }
+
+    {
+        result<void, std::string> r { std::in_place };
+        EXPECT_TRUE(r);
+    }
+
+    {
+        result<void, int> r { std::in_place };
+        EXPECT_TRUE(r);
     }
 }

@@ -97,6 +97,14 @@ public:
         , _status(result_status::failure)
     {}
 
+    template<typename... Args>
+        requires std::is_constructible_v<T, Args&&...>
+    constexpr explicit result_storage_base(std::in_place_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
+        : _value(std::forward<Args>(args)...)
+        , _status(result_status::success)
+    {}
+
     /// Constructs an object without initialization of value or error.
     constexpr explicit result_storage_base(result_helpers::skip_init) noexcept
         : _status()
@@ -142,6 +150,14 @@ public:
         noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
         : _error(std::forward<Args>(args)...)
         , _status(result_status::failure)
+    {}
+
+    template<typename... Args>
+        requires std::is_constructible_v<T, Args&&...>
+    constexpr explicit result_storage_base(std::in_place_t, Args&&... args)
+        noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
+        : _value(std::forward<Args>(args)...)
+        , _status(result_status::success)
     {}
 
     /// Destructor.
@@ -351,6 +367,10 @@ public:
         , _status(result_status::failure)
     {}
 
+    constexpr explicit result_storage_base(std::in_place_t) noexcept
+        : _status(result_status::success)
+    {}
+
     /// Destructor.
     ~result_storage_base() = default;
 
@@ -381,6 +401,10 @@ public:
         noexcept(std::is_nothrow_constructible_v<E, Args&&...>)
         : _error(std::forward<Args>(args)...)
         , _status(result_status::failure)
+    {}
+
+    constexpr explicit result_storage_base(std::in_place_t) noexcept
+        : _status(result_status::success)
     {}
 
     /// Destructor.
