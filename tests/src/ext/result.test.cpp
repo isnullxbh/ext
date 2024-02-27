@@ -433,3 +433,195 @@ TEST(ResultTests, ConstructFromFailure)
         EXPECT_EQ(r.error(), "abc");
     }
 }
+
+TEST(ResultTests, Map_LvalueRefQualifier)
+{
+    using namespace ext;
+
+    const auto get_length = [](const std::string& str){ return str.size(); };
+    const auto get_random = [](){ return 11; };
+    const auto do_nothing = [](){};
+    const auto use_string = [](const std::string&){};
+
+    // T - object
+    {
+        result<std::string, int> r1 { "abc" };
+        const auto r2 = r1.map(get_length);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), 3U);
+    }
+
+    {
+        result<std::string, int> r1 { failure_tag, 11 };
+        const auto r2 = r1.map(get_length);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), r1.error());
+    }
+
+    {
+        result<std::string, int> r1 { "abc" };
+        const auto r2 = r1.map(use_string);
+        ASSERT_TRUE(r2);
+    }
+
+    {
+        result<std::string, int> r1 { failure_tag, 11 };
+        const auto r2 = r1.map(use_string);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), r1.error());
+    }
+
+    // T - reference
+    {
+        std::string value { "abc" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = r1.map(get_length);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), 3U);
+    }
+
+    {
+        result<std::string&, int> r1 { failure_tag, 11 };
+        const auto r2 = r1.map(get_length);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    {
+        std::string value { "abc" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = r1.map(use_string);
+        ASSERT_TRUE(r2);
+    }
+
+    {
+        result<std::string&, int> r1 { failure_tag, 11 };
+        const auto r2 = r1.map(use_string);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    // T - void
+    {
+        result<void, int> r1 {};
+        const auto r2 = r1.map(get_random);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), 11);
+    }
+
+    {
+        result<void, int> r1 { failure_tag, 7 };
+        const auto r2 = r1.map(get_random);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), r1.error());
+    }
+
+    {
+        result<void, int> r1 {};
+        const auto r2 = r1.map(do_nothing);
+        ASSERT_TRUE(r2);
+    }
+
+    {
+        result<void, int> r1 { failure_tag, 7 };
+        const auto r2 = r1.map(do_nothing);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), r1.error());
+    }
+}
+
+TEST(ResultTests, Map_RvalueRefQualifier)
+{
+    using namespace ext;
+
+    const auto get_length = [](std::string&& str){ return str.size(); };
+    const auto get_random = [](){ return 11; };
+    const auto do_nothing = [](){};
+    const auto use_string = [](std::string&&){};
+
+    // T - object
+    {
+        result<std::string, int> r1 { "abc" };
+        const auto r2 = std::move(r1).map(get_length);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), 3U);
+    }
+
+    {
+        result<std::string, int> r1 { failure_tag, 11 };
+        const auto r2 = std::move(r1).map(get_length);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    {
+        result<std::string, int> r1 { "abc" };
+        const auto r2 = std::move(r1).map(use_string);
+        ASSERT_TRUE(r2);
+    }
+
+    {
+        result<std::string, int> r1 { failure_tag, 11 };
+        const auto r2 = std::move(r1).map(use_string);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    // T - reference
+    {
+        std::string value { "abc" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = std::move(r1).map(get_length);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), 3U);
+    }
+
+    {
+        result<std::string&, int> r1 { failure_tag, 11 };
+        const auto r2 = std::move(r1).map(get_length);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    {
+        std::string value { "abc" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = std::move(r1).map(use_string);
+        ASSERT_TRUE(r2);
+    }
+
+    {
+        result<std::string&, int> r1 { failure_tag, 11 };
+        const auto r2 = std::move(r1).map(use_string);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    // T - void
+    {
+        result<void, int> r1 {};
+        const auto r2 = std::move(r1).map(get_random);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), 11);
+    }
+
+    {
+        result<void, int> r1 { failure_tag, 7 };
+        const auto r2 = std::move(r1).map(get_random);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+
+    {
+        result<void, int> r1 {};
+        const auto r2 = std::move(r1).map(do_nothing);
+        ASSERT_TRUE(r2);
+    }
+
+    {
+        result<void, int> r1 { failure_tag, 7 };
+        const auto r2 = std::move(r1).map(do_nothing);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+}

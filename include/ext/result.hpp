@@ -7,6 +7,7 @@
 #pragma once
 
 #include <exception>
+#include <functional>
 
 #include <ext/detail/common.hpp>
 #include <ext/detail/doxygen.hpp>
@@ -255,6 +256,47 @@ public:
     /// Checks whether the result is success.
     /// @return If result contains a value - true, otherwise - false.
     constexpr explicit operator bool() const noexcept;
+
+    /// Maps result to a result of another type by applying the specified function (or functional object) to the
+    /// contained value.
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires (!std::is_void_v<T>)
+              && std::is_invocable_v<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>
+              && std::is_copy_constructible_v<E>
+    constexpr auto map(F&& f) const &
+        -> result<std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>, E>;
+
+    /// Maps result to a result of another type by applying the specified function (or functional object) to the
+    /// contained value.
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && std::is_copy_constructible_v<E>
+    constexpr auto map(F&& f) const & -> result<std::invoke_result_t<F>, E>;
+
+    /// Maps result to a result of another type by applying the specified function (or functional object) to the
+    /// contained value.
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires (!std::is_void_v<T>)
+              && std::is_invocable_v<F, std::remove_reference_t<T>&&>
+              && std::is_move_constructible_v<E>
+    constexpr auto map(F&& f) && -> result<std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>, E>;
+
+    /// Maps result to a result of another type by applying the specified function (or functional object) to the
+    /// contained value.
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && std::is_move_constructible_v<E>
+    constexpr auto map(F&& f) && -> result<std::invoke_result_t<F>, E>;
 
     template<typename U, typename V>
     friend class result;
@@ -530,6 +572,92 @@ template<typename T, typename E>
 constexpr result<T, E>::operator bool() const noexcept
 {
     return this->_status == result_status::success;
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires (!std::is_void_v<T>)
+          && std::is_invocable_v<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>
+          && std::is_copy_constructible_v<E>
+constexpr auto result<T, E>::map(F&& f) const &
+    -> result<std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>, E>
+{
+    using result_t = result<std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>, E>;
+
+    if constexpr (!std::is_void_v<typename result_t::value_type>)
+    {
+        return *this ? result_t { std::invoke(std::forward<F>(f), value()) }
+                     : result_t { failure_tag, error() };
+    }
+    else
+    {
+        return *this ? (std::invoke(std::forward<F>(f), value()), result_t {})
+                     : result_t { failure_tag, error() };
+    }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && std::is_copy_constructible_v<E>
+constexpr auto result<T, E>::map(F&& f) const & -> result<std::invoke_result_t<F>, E>
+{
+    using result_t = result<std::invoke_result_t<F>, E>;
+
+    if constexpr (!std::is_void_v<typename result_t::value_type>)
+    {
+        return *this ? result_t { std::invoke(std::forward<F>(f)) }
+                     : result_t { failure_tag, error() };
+    }
+    else
+    {
+        return *this ? (std::invoke(std::forward<F>(f)), result_t {})
+                     : result_t { failure_tag, error() };
+    }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires (!std::is_void_v<T>)
+          && std::is_invocable_v<F, std::remove_reference_t<T>&&>
+          && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::map(F&& f) &&
+    -> result<std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>, E>
+{
+    using result_t = result<std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>, E>;
+
+    if constexpr (!std::is_void_v<typename result_t::value_type>)
+    {
+        return *this ? result_t { std::invoke(std::forward<F>(f), std::move(value())) }
+                     : result_t { failure_tag, std::move(error()) };
+    }
+    else
+    {
+        return *this ? (std::invoke(std::forward<F>(f), std::move(value())), result_t {})
+                     : result_t { failure_tag, std::move(error()) };
+    }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::map(F&& f) && -> result<std::invoke_result_t<F>, E>
+{
+    using result_t = result<std::invoke_result_t<F>, E>;
+
+    if constexpr (!std::is_void_v<typename result_t::value_type>)
+    {
+        return *this ? result_t { std::invoke(std::forward<F>(f)) }
+                     : result_t { failure_tag, std::move(error()) };
+    }
+    else
+    {
+        return *this ? (std::invoke(std::forward<F>(f)), result_t {})
+                     : result_t { failure_tag, std::move(error()) };
+    }
 }
 
 } // namespace ext
