@@ -836,10 +836,16 @@ TEST(ResultTests, Apply_LvalueRefQualifier)
     using namespace ext;
 
     auto get_length = [](const std::string& str){ return str.size(); };
+    auto get_random = [](){ return 11; };
 
     struct GetLength
     {
         auto operator()(const std::string& str){ return str.size(); }
+    };
+
+    struct GetRandom
+    {
+        auto operator()(){ return 11; }
     };
 
     // T - object
@@ -953,6 +959,61 @@ TEST(ResultTests, Apply_LvalueRefQualifier)
         ASSERT_FALSE(r04);
         EXPECT_EQ(r04.error(), 14);
     }
+
+    // T - void
+    {
+        result<decltype(get_random), int> r1 { get_random };
+        result<GetRandom, int>            r2 { GetRandom() };
+        const result<void, int>           r0 {};
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_TRUE(r01);
+        EXPECT_EQ(r01.value(), 11);
+        ASSERT_TRUE(r02);
+        EXPECT_EQ(r02.value(), 11);
+        ASSERT_TRUE(r03);
+        EXPECT_EQ(r03.value(), 11);
+        ASSERT_TRUE(r04);
+        EXPECT_EQ(r04.value(), 11);
+    }
+
+    {
+        result<decltype(get_random), int> r1 { get_random };
+        result<GetRandom, int>            r2 { GetRandom() };
+        const result<void, int>           r0 { failure_tag, 11 };
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 11);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 11);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 11);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 11);
+    }
+
+    {
+        result<decltype(get_random), int> r1 { failure_tag, 12 };
+        result<GetRandom, int>            r2 { failure_tag, 14 };
+        const result<void, int>           r0 {};
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 12);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 14);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 12);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 14);
+    }
 }
 
 TEST(ResultTests, Apply_RvalueRefQualifier)
@@ -960,10 +1021,16 @@ TEST(ResultTests, Apply_RvalueRefQualifier)
     using namespace ext;
 
     auto get_length = [](std::string&& str){ return str.size(); };
+    auto get_random = [](){ return 11; };
 
     struct GetLength
     {
         auto operator()(std::string&& str){ return str.size(); }
+    };
+
+    struct GetRandom
+    {
+        auto operator()(){ return 11; }
     };
 
     // T - object
@@ -1031,4 +1098,68 @@ TEST(ResultTests, Apply_RvalueRefQualifier)
     }
 
     // TODO: T - reference (add get_value with const qualifier)
+
+    // T - void
+    {
+        result<decltype(get_random), int> r1 { get_random };
+        result<GetRandom, int>            r2 { GetRandom() };
+        result<void, int>                 r10 {};
+        result<void, int>                 r20 {};
+        result<void, int>                 r30 {};
+        result<void, int>                 r40 {};
+        const auto r01 = std::move(r10).apply(r1);
+        const auto r02 = std::move(r20).apply(r2);
+        const auto r03 = std::move(r30).apply(std::move(r1));
+        const auto r04 = std::move(r40).apply(std::move(r2));
+        ASSERT_TRUE(r01);
+        EXPECT_EQ(r01.value(), 11);
+        ASSERT_TRUE(r02);
+        EXPECT_EQ(r02.value(), 11);
+        ASSERT_TRUE(r03);
+        EXPECT_EQ(r03.value(), 11);
+        ASSERT_TRUE(r04);
+        EXPECT_EQ(r04.value(), 11);
+    }
+
+    {
+        result<decltype(get_random), int> r1 { get_random };
+        result<GetRandom, int>            r2 { GetRandom() };
+        result<void, int>                 r10 { failure_tag, 11 };
+        result<void, int>                 r20 { failure_tag, 11 };
+        result<void, int>                 r30 { failure_tag, 11 };
+        result<void, int>                 r40 { failure_tag, 11 };
+        const auto r01 = std::move(r10).apply(r1);
+        const auto r02 = std::move(r20).apply(r2);
+        const auto r03 = std::move(r30).apply(std::move(r1));
+        const auto r04 = std::move(r40).apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 11);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 11);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 11);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 11);
+    }
+
+    {
+        result<decltype(get_random), int> r1 { failure_tag, 12 };
+        result<GetRandom, int>            r2 { failure_tag, 14 };
+        result<void, int>                 r10 {};
+        result<void, int>                 r20 {};
+        result<void, int>                 r30 {};
+        result<void, int>                 r40 {};
+        const auto r01 = std::move(r10).apply(r1);
+        const auto r02 = std::move(r20).apply(r2);
+        const auto r03 = std::move(r30).apply(std::move(r1));
+        const auto r04 = std::move(r40).apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 12);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 14);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 12);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 14);
+    }
 }

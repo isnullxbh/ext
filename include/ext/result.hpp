@@ -422,6 +422,48 @@ public:
     constexpr auto apply(result<F, E>&& rhs) &&
         -> result<std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>, E>;
 
+    /// Applies the function (or functional object) contained in the specified result to the result's value.
+    /// Signature: result<T, E> -> result<F, E> -> result<T', E>, F: void -> T'
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && std::is_copy_constructible_v<E>
+    constexpr auto apply(result<F, E>& rhs) const & -> result<std::invoke_result_t<F>, E>;
+
+    /// Applies the function (or functional object) contained in the specified result to the result's value.
+    /// Signature: result<T, E> -> result<F, E> -> result<T', E>, F: void -> T'
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && std::is_copy_constructible_v<E>
+              && std::is_move_constructible_v<E>
+    constexpr auto apply(result<F, E>& rhs) && -> result<std::invoke_result_t<F>, E>;
+
+    /// Applies the function (or functional object) contained in the specified result to the result's value.
+    /// Signature: result<T, E> -> result<F, E> -> result<T', E>, F: void -> T'
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && std::is_copy_constructible_v<E>
+              && std::is_move_constructible_v<E>
+    constexpr auto apply(result<F, E>&& rhs) const & -> result<std::invoke_result_t<F>, E>;
+
+    /// Applies the function (or functional object) contained in the specified result to the result's value.
+    /// Signature: result<T, E> -> result<F, E> -> result<T', E>, F: void -> T'
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && std::is_move_constructible_v<E>
+    constexpr auto apply(result<F, E>&& rhs) && -> result<std::invoke_result_t<F>, E>;
+
     template<typename U, typename V>
     friend class result;
 };
@@ -969,6 +1011,124 @@ constexpr auto result<T, E>::apply(result<F, E>&& rhs) &&
     else
     {
         return result_t { std::invoke(std::move(rhs).value(), std::move(value())) };
+    }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && std::is_copy_constructible_v<E>
+constexpr auto result<T, E>::apply(result<F, E>& rhs) const & -> result<std::invoke_result_t<F>, E>
+{
+    using result_t = result<std::invoke_result_t<F>, E>;
+
+    if (!*this)
+    {
+        return result_t { failure_tag, error() };
+    }
+
+    if (!rhs)
+    {
+        return result_t { failure_tag, rhs.error() };
+    }
+
+    if constexpr (std::is_void_v<typename result_t::value_type>)
+    {
+        return (std::invoke(rhs.value()), result_t {});
+    }
+    else
+    {
+        return result_t { std::invoke(rhs.value()) };
+    }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && std::is_copy_constructible_v<E>
+          && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::apply(result<F, E>& rhs) && -> result<std::invoke_result_t<F>, E>
+{
+    using result_t = result<std::invoke_result_t<F>, E>;
+
+    if (!*this)
+    {
+        return result_t { failure_tag, std::move(error()) };
+    }
+
+    if (!rhs)
+    {
+        return result_t { failure_tag, rhs.error() };
+    }
+
+    if constexpr (std::is_void_v<typename result_t::value_type>)
+    {
+        return (std::invoke(rhs.value()), result_t {});
+    }
+    else
+    {
+        return result_t { std::invoke(rhs.value()) };
+    }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && std::is_copy_constructible_v<E>
+          && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::apply(result<F, E>&& rhs) const & -> result<std::invoke_result_t<F>, E>
+{
+    using result_t = result<std::invoke_result_t<F>, E>;
+
+    if (!*this)
+    {
+        return result_t { failure_tag, error() };
+    }
+
+    if (!rhs)
+    {
+        return result_t { failure_tag, std::move(rhs).error() };
+    }
+
+    if constexpr (std::is_void_v<typename result_t::value_type>)
+    {
+        return (std::invoke(std::move(rhs).value()), result_t {});
+    }
+    else
+    {
+        return result_t { std::invoke(std::move(rhs).value()) };
+    }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::apply(result<F, E>&& rhs) && -> result<std::invoke_result_t<F>, E>
+{
+    using result_t = result<std::invoke_result_t<F>, E>;
+
+    if (!*this)
+    {
+        return result_t { failure_tag, std::move(error()) };
+    }
+
+    if (!rhs)
+    {
+        return result_t { failure_tag, std::move(rhs).error() };
+    }
+
+    if constexpr (std::is_void_v<typename result_t::value_type>)
+    {
+        return (std::invoke(std::move(rhs).value()), result_t {});
+    }
+    else
+    {
+        return result_t { std::invoke(std::move(rhs).value()) };
     }
 }
 
