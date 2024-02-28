@@ -64,6 +64,26 @@ struct is_failure
 template<typename T, typename E = ignore>
 constexpr inline auto is_failure_v = is_failure<T, E>::value;
 
+/// A type traits for checking whether the specified type is a specialization of the ext::result class template.
+/// @tparam  R Type to check.
+/// @tparam  T Expected value type.
+/// @tparam  E Expected error type.
+/// @ingroup ext-utility-result
+/// @since   0.1.0
+template<typename R, typename T = ignore, typename E = ignore>
+struct is_result
+    : detail::is_result<std::remove_cv_t<R>, T, E>
+{};
+
+/// An auxiliary variable template for the ext::is_result type trait.
+/// @tparam  R Type to check.
+/// @tparam  T Expected value type.
+/// @tparam  E Expected error type.
+/// @ingroup ext-utility-result
+/// @since   0.1.0
+template<typename R, typename T = ignore, typename E = ignore>
+constexpr inline auto is_result_v = is_result<R, T, E>::value;
+
 /// Represents either success (value) or failure (error).
 /// @tparam  T Value type.
 /// @tparam  E Error type.
@@ -259,6 +279,7 @@ public:
 
     /// Maps result to a result of another type by applying the specified function (or functional object) to the
     /// contained value.
+    /// Signature: result<T, E> -> (T -> T') -> result<T', E>
     /// @tparam F Function type.
     /// @param  f Function.
     template<typename F>
@@ -270,6 +291,7 @@ public:
 
     /// Maps result to a result of another type by applying the specified function (or functional object) to the
     /// contained value.
+    /// Signature: result<T, E> -> (T -> T') -> result<T', E>
     /// @tparam F Function type.
     /// @param  f Function.
     template<typename F>
@@ -280,6 +302,7 @@ public:
 
     /// Maps result to a result of another type by applying the specified function (or functional object) to the
     /// contained value.
+    /// Signature: result<T, E> -> (T -> T') -> result<T', E>
     /// @tparam F Function type.
     /// @param  f Function.
     template<typename F>
@@ -290,6 +313,7 @@ public:
 
     /// Maps result to a result of another type by applying the specified function (or functional object) to the
     /// contained value.
+    /// Signature: result<T, E> -> (T -> T') -> result<T', E>
     /// @tparam F Function type.
     /// @param  f Function.
     template<typename F>
@@ -297,6 +321,52 @@ public:
               && std::is_invocable_v<F>
               && std::is_move_constructible_v<E>
     constexpr auto map(F&& f) && -> result<std::invoke_result_t<F>, E>;
+
+    /// Binds the specified function (or functional object) across the result's value.
+    /// Signature: result<T, E> -> (T -> result<T', E>) -> result<T', E>
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires (!std::is_void_v<T>)
+              && std::is_invocable_v<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>
+              && is_result_v<std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>, ignore, E>
+              && std::is_copy_constructible_v<E>
+    constexpr auto bind(F&& f) const &
+        -> std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>;
+
+    /// Binds the specified function (or functional object) across the result's value.
+    /// Signature: result<T, E> -> (T -> result<T', E>) -> result<T', E>
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && is_result_v<std::invoke_result_t<F>, ignore, E>
+              && std::is_copy_constructible_v<E>
+    constexpr auto bind(F&& f) const & -> std::invoke_result_t<F>;
+
+    /// Binds the specified function (or functional object) across the result's value.
+    /// Signature: result<T, E> -> (T -> result<T', E>) -> result<T', E>
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires (!std::is_void_v<T>)
+              && std::is_invocable_v<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>
+              && is_result_v<std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>, ignore, E>
+              && std::is_move_constructible_v<E>
+    constexpr auto bind(F&& f) &&
+        -> std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>;
+
+    /// Binds the specified function (or functional object) across the result's value.
+    /// Signature: result<T, E> -> (T -> result<T', E>) -> result<T', E>
+    /// @tparam F Function type.
+    /// @param  f Function.
+    template<typename F>
+        requires std::is_void_v<T>
+              && std::is_invocable_v<F>
+              && is_result_v<std::invoke_result_t<F>, ignore, E>
+              && std::is_move_constructible_v<E>
+    constexpr auto bind(F&& f) && -> std::invoke_result_t<F>;
 
     template<typename U, typename V>
     friend class result;
@@ -658,6 +728,60 @@ constexpr auto result<T, E>::map(F&& f) && -> result<std::invoke_result_t<F>, E>
         return *this ? (std::invoke(std::forward<F>(f)), result_t {})
                      : result_t { failure_tag, std::move(error()) };
     }
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires (!std::is_void_v<T>)
+          && std::is_invocable_v<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>
+          && is_result_v<std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>, ignore, E>
+          && std::is_copy_constructible_v<E>
+constexpr auto result<T, E>::bind(F&& f) const &
+    -> std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>
+{
+    using result_t = std::invoke_result_t<F, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>;
+    return *this ? std::invoke(std::forward<F>(f), value())
+                 : result_t { failure_tag, error() };
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && is_result_v<std::invoke_result_t<F>, ignore, E>
+          && std::is_copy_constructible_v<E>
+constexpr auto result<T, E>::bind(F&& f) const & -> std::invoke_result_t<F>
+{
+    using result_t = std::invoke_result_t<F>;
+    return *this ? std::invoke(std::forward<F>(f))
+                 : result_t { failure_tag, error() };
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires (!std::is_void_v<T>)
+         && std::is_invocable_v<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>
+         && is_result_v<std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>, ignore, E>
+         && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::bind(F&& f) &&
+    -> std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>
+{
+    using result_t = std::invoke_result_t<F, std::add_rvalue_reference_t<std::remove_reference_t<T>>>;
+    return *this ? std::invoke(std::forward<F>(f), std::move(value()))
+                 : result_t { failure_tag, std::move(error()) };
+}
+
+template<typename T, typename E>
+template<typename F>
+    requires std::is_void_v<T>
+          && std::is_invocable_v<F>
+          && is_result_v<std::invoke_result_t<F>, ignore, E>
+          && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::bind(F&& f) && -> std::invoke_result_t<F>
+{
+    using result_t = std::invoke_result_t<F>;
+    return *this ? std::invoke(std::forward<F>(f))
+                 : result_t { failure_tag, error() };
 }
 
 } // namespace ext

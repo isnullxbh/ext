@@ -52,6 +52,17 @@ struct is_failure<failure<Ecur>, Eexp>
                        std::is_same<Ecur, Eexp>>
 {};
 
+template<typename T, typename U = ignore, typename V = ignore>
+struct is_result : std::false_type
+{};
+
+template<typename T, typename E, typename U, typename V>
+struct is_result<result<T, E>, U, V>
+     : std::conjunction<
+          std::disjunction<std::is_same<U, ignore>, std::is_same<T, U>>,
+          std::disjunction<std::is_same<V, ignore>, std::is_same<E, V>>>
+{};
+
 template<typename T, typename E, typename = void>
 struct result_trivially_destructible
     : std::bool_constant<std::is_trivially_destructible_v<T> &&

@@ -47,6 +47,23 @@ TEST(ResultTests, IsFailure)
     static_assert(!is_failure_v<failure<int>, char>);
 }
 
+TEST(ResultTests, IsResult)
+{
+    using namespace ext;
+
+    static_assert(is_result_v<result<int, char>>);
+    static_assert(is_result_v<result<int, char>, ignore, char>);
+    static_assert(is_result_v<result<int, char>, int>);
+    static_assert(is_result_v<result<int, char>, int, char>);
+
+    static_assert(!is_result_v<result<int, char>, ignore, short>);
+    static_assert(!is_result_v<result<int, char>, short>);
+    static_assert(!is_result_v<result<int, char>, short, char>);
+    static_assert(!is_result_v<result<int, char>, int, short>);
+
+    static_assert(!is_result_v<result<int, char>&>);
+}
+
 TEST(ResultTests, DefaultConstruction)
 {
     using namespace ext;
@@ -623,5 +640,193 @@ TEST(ResultTests, Map_RvalueRefQualifier)
         const auto r2 = std::move(r1).map(do_nothing);
         ASSERT_FALSE(r2);
         EXPECT_EQ(r2.error(), 7);
+    }
+}
+
+TEST(ResultTests, Bind_LvalueRefQualifier)
+{
+    using namespace ext;
+
+    const auto take_prefix = [](const std::string& str)
+    {
+        if (str.size() < 3)
+        {
+            return result<std::string, int> { failure_tag, 11 };
+        }
+        return result<std::string, int> { str.substr(0, 3) };
+    };
+
+    int a = 0;
+    const auto take_nothing = [&a]()
+    {
+        if (a < 0)
+        {
+            return result<std::string, int> { failure_tag, 11 };
+        }
+        return result<std::string, int> { "abc" };
+    };
+
+    // T - object
+    {
+        result<std::string, int> r1 { "abcd" };
+        const auto r2 = r1.bind(take_prefix);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), "abc");
+    }
+
+    {
+        result<std::string, int> r1 { failure_tag, 7 };
+        const auto r2 = r1.bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+
+    {
+        result<std::string, int> r1 { "a" };
+        const auto r2 = r1.bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    // T - reference
+    {
+        std::string value { "abcd" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = r1.bind(take_prefix);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), "abc");
+    }
+
+    {
+        result<std::string&, int> r1 { failure_tag, 7 };
+        const auto r2 = r1.bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+
+    {
+        std::string value { "a" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = r1.bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    // T - void
+    {
+        result<void, int> r1 {};
+        a = 0;
+        const auto r2 = r1.bind(take_nothing);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), "abc");
+    }
+
+    {
+        result<void, int> r1 { failure_tag, 7 };
+        const auto r2 = r1.bind(take_nothing);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+
+    {
+        result<void, int> r1 {};
+        a = -1;
+        const auto r2 = r1.bind(take_nothing);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+}
+
+TEST(ResultTests, Bind_RvalueRefQualifier)
+{
+    using namespace ext;
+
+    const auto take_prefix = [](std::string&& str)
+    {
+        if (str.size() < 3)
+        {
+            return result<std::string, int> { failure_tag, 11 };
+        }
+        return result<std::string, int> { str.substr(0, 3) };
+    };
+
+    int a = 0;
+    const auto take_nothing = [&a]()
+    {
+        if (a < 0)
+        {
+            return result<std::string, int> { failure_tag, 11 };
+        }
+        return result<std::string, int> { "abc" };
+    };
+
+    // T - object
+    {
+        result<std::string, int> r1 { "abcd" };
+        const auto r2 = std::move(r1).bind(take_prefix);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), "abc");
+    }
+
+    {
+        result<std::string, int> r1 { failure_tag, 7 };
+        const auto r2 = std::move(r1).bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+
+    {
+        result<std::string, int> r1 { "a" };
+        const auto r2 = std::move(r1).bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    // T - reference
+    {
+        std::string value { "abcd" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = std::move(r1).bind(take_prefix);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), "abc");
+    }
+
+    {
+        result<std::string&, int> r1 { failure_tag, 7 };
+        const auto r2 = std::move(r1).bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+
+    {
+        std::string value { "a" };
+        result<std::string&, int> r1 { value };
+        const auto r2 = std::move(r1).bind(take_prefix);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
+    }
+
+    // T - void
+    {
+        result<void, int> r1 {};
+        a = 0;
+        const auto r2 = std::move(r1).bind(take_nothing);
+        ASSERT_TRUE(r2);
+        EXPECT_EQ(r2.value(), "abc");
+    }
+
+    {
+        result<void, int> r1 { failure_tag, 7 };
+        const auto r2 = std::move(r1).bind(take_nothing);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 7);
+    }
+
+    {
+        result<void, int> r1 {};
+        a = -1;
+        const auto r2 = std::move(r1).bind(take_nothing);
+        ASSERT_FALSE(r2);
+        EXPECT_EQ(r2.error(), 11);
     }
 }
