@@ -84,6 +84,20 @@ struct is_result
 template<typename R, typename T = ignore, typename E = ignore>
 constexpr inline auto is_result_v = is_result<R, T, E>::value;
 
+/// Transforms the specified function into a corresponding function that accepts result objects as arguments.
+/// Signature: (T1 -> T2 -> ... -> Ret) -> result_lift<E> -> (result<T1, E> -> result<T2, E> -> ... -> result<Ret, E>)
+/// @tparam  E    Error type.
+/// @tparam  Ret  The return type of the original function.
+/// @tparam  Args Types of arguments to the original function.
+/// @param   f    Original function.
+/// @return  Lambda.
+/// @ingroup ext-utility-result
+/// @since   0.1.0
+/// @todo    Rename?
+template<typename E, typename Ret, typename... Args>
+    requires std::is_copy_constructible_v<E>
+constexpr auto result_lift(Ret(f)(Args...));
+
 /// Represents either success (value) or failure (error).
 /// @tparam  T Value type.
 /// @tparam  E Error type.
@@ -1130,6 +1144,25 @@ constexpr auto result<T, E>::apply(result<F, E>&& rhs) && -> result<std::invoke_
     {
         return result_t { std::invoke(std::move(rhs).value()) };
     }
+}
+
+template<typename E, typename Ret, typename... Args>
+    requires std::is_copy_constructible_v<E>
+constexpr auto result_lift(Ret(f)(Args...))
+{
+    return [f](auto&&... args)
+    {
+        static_assert((is_result_v<std::remove_reference_t<decltype(args)>> && ...),
+            "Types of arguments must be specializations of the ext::result template class");
+        static_assert((std::is_same_v<E, typename std::remove_reference_t<decltype(args)>::error_type> && ...),
+            "Results must have the same error type");
+        static_assert(std::is_invocable_v<decltype(f), decltype(args.value())...>,
+            "The original function cannot be called with the specified arguments");
+
+        const auto* err = detail::result_helpers::get_error<E>(args...);
+        return err ? result<Ret, E> { failure_tag, *err }
+                   : result<Ret, E> { f(std::forward<decltype(args)>(args).value()...) };
+    };
 }
 
 } // namespace ext

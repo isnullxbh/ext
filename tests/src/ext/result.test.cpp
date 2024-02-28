@@ -1163,3 +1163,55 @@ TEST(ResultTests, Apply_RvalueRefQualifier)
         EXPECT_EQ(r04.error(), 14);
     }
 }
+
+static int sum1(int a, int b){ return a + b; }
+
+TEST(ResultTests, Lift)
+{
+    using namespace ext;
+
+    {
+        auto sum = result_lift<char>(sum1);
+        result<int, char> r1 { 1 };
+        result<int, char> r2 { 2 };
+        const auto r3 = sum(r1, r2);
+        ASSERT_TRUE(r3);
+        EXPECT_EQ(r3.value(), 3);
+    }
+
+    {
+        auto sum2 = +[](int a, int b){ return a + b; };
+        auto sum = result_lift<char>(sum2);
+        result<int, char> r1 { 1 };
+        result<int, char> r2 { 2 };
+        const auto r3 = sum(r1, r2);
+        ASSERT_TRUE(r3);
+        EXPECT_EQ(r3.value(), 3);
+    }
+
+    {
+        auto concat = result_lift<int>(+[](const std::string& lhs, const std::string& rhs) -> std::string { return lhs + rhs; });
+        result<std::string, int> r1 { "abc" };
+        const result<std::string, int> r2 { "def" };
+        const auto r3 = concat(r1, r2);
+        ASSERT_TRUE(r3);
+        EXPECT_EQ(r3.value(), "abcdef");
+    }
+
+    {
+        auto concat = result_lift<int>(+[](const std::string& lhs, const std::string& rhs) -> std::string { return lhs + rhs; });
+        result<std::string, int> r1 { "abc" };
+        const result<std::string, int> r2 { failure_tag, 11 };
+        const auto r3 = concat(r1, r2);
+        ASSERT_FALSE(r3);
+        EXPECT_EQ(r3.error(), 11);
+    }
+
+    {
+        auto concat = result_lift<int>(+[](const std::string& lhs, const std::string& rhs) -> std::string { return lhs + rhs; });
+        result<std::string, int> r1 { "abc" };
+        const auto r3 = concat(r1, result<std::string, int>{ "def" });
+        ASSERT_TRUE(r3);
+        EXPECT_EQ(r3.value(), "abcdef");
+    }
+}

@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <memory>
 #include <type_traits>
 #include <utility>
 
@@ -39,6 +40,23 @@ namespace result_helpers
 {
 
 struct skip_init {};
+
+template<typename E>
+constexpr auto get_error() noexcept -> const E*
+{
+    return static_cast<const E*>(nullptr);
+}
+
+template<typename E, typename T, typename... Ts>
+constexpr auto get_error(const T& t, const Ts&... ts)
+{
+    if (t.is_failure())
+    {
+        return std::addressof(t.error());
+    }
+
+    return get_error<E>(ts...);
+}
 
 } // namespace result_helpers
 
