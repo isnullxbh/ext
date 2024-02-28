@@ -830,3 +830,205 @@ TEST(ResultTests, Bind_RvalueRefQualifier)
         EXPECT_EQ(r2.error(), 11);
     }
 }
+
+TEST(ResultTests, Apply_LvalueRefQualifier)
+{
+    using namespace ext;
+
+    auto get_length = [](const std::string& str){ return str.size(); };
+
+    struct GetLength
+    {
+        auto operator()(const std::string& str){ return str.size(); }
+    };
+
+    // T - object
+    {
+        result<decltype(get_length), int> r1 { get_length };
+        result<GetLength, int>            r2 { GetLength() };
+        const result<std::string, int>    r0 { "abc" };
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_TRUE(r01);
+        EXPECT_EQ(r01.value(), 3U);
+        ASSERT_TRUE(r02);
+        EXPECT_EQ(r02.value(), 3U);
+        ASSERT_TRUE(r03);
+        EXPECT_EQ(r03.value(), 3U);
+        ASSERT_TRUE(r04);
+        EXPECT_EQ(r04.value(), 3U);
+    }
+
+    {
+        result<decltype(get_length), int> r1 { get_length };
+        result<GetLength, int>            r2 { GetLength() };
+        const result<std::string, int>    r0 { failure_tag, 11 };
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 11);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 11);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 11);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 11);
+    }
+
+    {
+        result<decltype(get_length), int> r1 { failure_tag, 12 };
+        result<GetLength, int>            r2 { failure_tag, 14 };
+        const result<std::string, int>    r0 { "abc" };
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 12);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 14);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 12);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 14);
+    }
+
+    // T - reference
+    {
+        std::string value { "abc" };
+        result<decltype(get_length), int> r1 { get_length };
+        result<GetLength, int>            r2 { GetLength() };
+        const result<std::string&, int>   r0 { value };
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_TRUE(r01);
+        EXPECT_EQ(r01.value(), 3U);
+        ASSERT_TRUE(r02);
+        EXPECT_EQ(r02.value(), 3U);
+        ASSERT_TRUE(r03);
+        EXPECT_EQ(r03.value(), 3U);
+        ASSERT_TRUE(r04);
+        EXPECT_EQ(r04.value(), 3U);
+    }
+
+    {
+        result<decltype(get_length), int> r1 { get_length };
+        result<GetLength, int>            r2 { GetLength() };
+        const result<std::string&, int>   r0 { failure_tag, 11 };
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 11);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 11);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 11);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 11);
+    }
+
+    {
+        std::string value { "abc" };
+        result<decltype(get_length), int> r1 { failure_tag, 12 };
+        result<GetLength, int>            r2 { failure_tag, 14 };
+        const result<std::string&, int>   r0 { value };
+        const auto r01 = r0.apply(r1);
+        const auto r02 = r0.apply(r2);
+        const auto r03 = r0.apply(std::move(r1));
+        const auto r04 = r0.apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 12);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 14);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 12);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 14);
+    }
+}
+
+TEST(ResultTests, Apply_RvalueRefQualifier)
+{
+    using namespace ext;
+
+    auto get_length = [](std::string&& str){ return str.size(); };
+
+    struct GetLength
+    {
+        auto operator()(std::string&& str){ return str.size(); }
+    };
+
+    // T - object
+    {
+        result<decltype(get_length), int> r1 { get_length };
+        result<GetLength, int>            r2 { GetLength() };
+        result<std::string, int>          r10 { "abc" };
+        result<std::string, int>          r20 { "abc" };
+        result<std::string, int>          r30 { "abc" };
+        result<std::string, int>          r40 { "abc" };
+        const auto r01 = std::move(r10).apply(r1);
+        const auto r02 = std::move(r20).apply(r2);
+        const auto r03 = std::move(r30).apply(std::move(r1));
+        const auto r04 = std::move(r40).apply(std::move(r2));
+        ASSERT_TRUE(r01);
+        EXPECT_EQ(r01.value(), 3U);
+        ASSERT_TRUE(r02);
+        EXPECT_EQ(r02.value(), 3U);
+        ASSERT_TRUE(r03);
+        EXPECT_EQ(r03.value(), 3U);
+        ASSERT_TRUE(r04);
+        EXPECT_EQ(r04.value(), 3U);
+    }
+
+    {
+        result<decltype(get_length), int> r1 { get_length };
+        result<GetLength, int>            r2 { GetLength() };
+        result<std::string, int>          r10 { failure_tag, 11 };
+        result<std::string, int>          r20 { failure_tag, 11 };
+        result<std::string, int>          r30 { failure_tag, 11 };
+        result<std::string, int>          r40 { failure_tag, 11 };
+        const auto r01 = std::move(r10).apply(r1);
+        const auto r02 = std::move(r20).apply(r2);
+        const auto r03 = std::move(r30).apply(std::move(r1));
+        const auto r04 = std::move(r40).apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 11);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 11);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 11);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 11);
+    }
+
+    {
+        result<decltype(get_length), int> r1 { failure_tag, 12 };
+        result<GetLength, int>            r2 { failure_tag, 14 };
+        result<std::string, int>          r10 { "abc" };
+        result<std::string, int>          r20 { "abc" };
+        result<std::string, int>          r30 { "abc" };
+        result<std::string, int>          r40 { "abc" };
+        const auto r01 = std::move(r10).apply(r1);
+        const auto r02 = std::move(r20).apply(r2);
+        const auto r03 = std::move(r30).apply(std::move(r1));
+        const auto r04 = std::move(r40).apply(std::move(r2));
+        ASSERT_FALSE(r01);
+        EXPECT_EQ(r01.error(), 12);
+        ASSERT_FALSE(r02);
+        EXPECT_EQ(r02.error(), 14);
+        ASSERT_FALSE(r03);
+        EXPECT_EQ(r03.error(), 12);
+        ASSERT_FALSE(r04);
+        EXPECT_EQ(r04.error(), 14);
+    }
+
+    // TODO: T - reference (add get_value with const qualifier)
+}
