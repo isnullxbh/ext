@@ -451,6 +451,67 @@ TEST(ResultTests, ConstructFromFailure)
     }
 }
 
+TEST(ResultTests, ValueMatches)
+{
+    using namespace ext;
+
+    const auto starts_with_abc = [](const std::string& str){ return str.starts_with("abc"); };
+
+    {
+        result<std::string, int> r { "abc" };
+        EXPECT_TRUE(r.value_matches(starts_with_abc));
+    }
+
+    {
+        result<std::string, int> r { "vbc" };
+        EXPECT_FALSE(r.value_matches(starts_with_abc));
+    }
+
+    {
+        result<std::string, int> r { failure_tag, 11 };
+        EXPECT_FALSE(r.value_matches(starts_with_abc));
+    }
+
+    {
+        std::string value { "abc" };
+        result<std::string&, int> r { value };
+        EXPECT_TRUE(r.value_matches(starts_with_abc));
+    }
+
+    {
+        std::string value { "_bc" };
+        result<std::string&, int> r { value };
+        EXPECT_FALSE(r.value_matches(starts_with_abc));
+    }
+
+    {
+        result<std::string&, int> r { failure_tag, 11 };
+        EXPECT_FALSE(r.value_matches(starts_with_abc));
+    }
+}
+
+TEST(ResultTests, ErrorMatches)
+{
+    using namespace ext;
+
+    const auto starts_with_abc = [](const std::string& str){ return str.starts_with("abc"); };
+
+    {
+        result<int, std::string> r { failure_tag, "abc" };
+        EXPECT_TRUE(r.error_matches(starts_with_abc));
+    }
+
+    {
+        result<int, std::string> r { failure_tag, "xbc" };
+        EXPECT_FALSE(r.error_matches(starts_with_abc));
+    }
+
+    {
+        result<int, std::string> r { 10 };
+        EXPECT_FALSE(r.error_matches(starts_with_abc));
+    }
+}
+
 TEST(ResultTests, Map_LvalueRefQualifier)
 {
     using namespace ext;

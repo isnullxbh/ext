@@ -299,6 +299,22 @@ public:
     /// @return If result contains a value - true, otherwise - false.
     constexpr explicit operator bool() const noexcept;
 
+    /// Checks whether the contained value matches the specified predicate.
+    /// @tparam Predicate Predicate type.
+    /// @param  predicate Predicate.
+    /// @return If the result contains a value and this value matches the specified predicate - true, otherwise - false.
+    template<typename Predicate>
+        requires std::is_invocable_r_v<bool, Predicate, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>
+    constexpr auto value_matches(Predicate&& predicate) const -> bool;
+
+    /// Checks whether the contained error matches the specified predicate.
+    /// @tparam Predicate Predicate type.
+    /// @param  predicate Predicate.
+    /// @return If the result contains an error and this error matches the specified predicate - true, otherwise - false.
+    template<typename Predicate>
+        requires std::is_invocable_r_v<bool, Predicate, const E&>
+    constexpr auto error_matches(Predicate&& predicate) const -> bool;
+
     /// Maps result to a result of another type by applying the specified function (or functional object) to the
     /// contained value.
     /// Signature: result<T, E> -> (T -> T') -> result<T', E>
@@ -764,6 +780,22 @@ template<typename T, typename E>
 constexpr result<T, E>::operator bool() const noexcept
 {
     return this->_status == result_status::success;
+}
+
+template<typename T, typename E>
+template<typename Predicate>
+    requires std::is_invocable_r_v<bool, Predicate, std::add_lvalue_reference_t<const std::remove_reference_t<T>>>
+constexpr auto result<T, E>::value_matches(Predicate&& predicate) const -> bool
+{
+    return is_success() && std::invoke(std::forward<Predicate>(predicate), value());
+}
+
+template<typename T, typename E>
+template<typename Predicate>
+    requires std::is_invocable_r_v<bool, Predicate, const E&>
+constexpr auto result<T, E>::error_matches(Predicate&& predicate) const -> bool
+{
+    return is_failure() && std::invoke(std::forward<Predicate>(predicate), error());
 }
 
 template<typename T, typename E>
