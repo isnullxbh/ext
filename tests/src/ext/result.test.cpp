@@ -451,6 +451,100 @@ TEST(ResultTests, ConstructFromFailure)
     }
 }
 
+TEST(ResultTests, ValueOr_LvalueRefQualifier)
+{
+    using namespace ext;
+
+    {
+        const result<std::string, int> r { "abc" };
+        const auto v = r.value_or("def");
+        EXPECT_EQ(v, "abc");
+    }
+
+    {
+        const result<std::string, int> r { failure_tag, 11 };
+        const auto v = r.value_or("def");
+        EXPECT_EQ(v, "def");
+    }
+
+    {
+        std::string value { "abc" };
+        const result<std::string&, int> r { value };
+        const auto v = r.value_or("def");
+        EXPECT_EQ(v, "abc");
+    }
+
+    {
+        const result<std::string&, int> r { failure_tag, 11 };
+        const auto v = r.value_or("def");
+        EXPECT_EQ(v, "def");
+    }
+}
+
+TEST(ResultTests, ValueOr_RvalueRefQualifier)
+{
+    using namespace ext;
+
+    {
+        result<std::string, int> r { "abc" };
+        const auto v = std::move(r).value_or("def");
+        EXPECT_EQ(v, "abc");
+    }
+
+    {
+        result<std::string, int> r { failure_tag, 11 };
+        const auto v = std::move(r).value_or("def");
+        EXPECT_EQ(v, "def");
+    }
+
+    {
+        std::string value { "abc" };
+        result<std::string&, int> r { value };
+        const auto v = std::move(r).value_or("def");
+        EXPECT_EQ(v, "abc");
+    }
+
+    {
+        result<std::string&, int> r { failure_tag, 11 };
+        const auto v = std::move(r).value_or("def");
+        EXPECT_EQ(v, "def");
+    }
+}
+
+TEST(ResultTests, ErrorOr_LvalueRefQualifier)
+{
+    using namespace ext;
+
+    {
+        const result<int, std::string> r { failure_tag, "abc" };
+        const auto v = r.error_or("def");
+        EXPECT_EQ(v, "abc");
+    }
+
+    {
+        const result<int, std::string> r { 11 };
+        const auto v = r.error_or("def");
+        EXPECT_EQ(v, "def");
+    }
+}
+
+TEST(ResultTests, ErrorOr_RvalueRefQualifier)
+{
+    using namespace ext;
+
+    {
+        result<int, std::string> r { failure_tag, "abc" };
+        const auto v = std::move(r).error_or("def");
+        EXPECT_EQ(v, "abc");
+    }
+
+    {
+        result<int, std::string> r { 11 };
+        const auto v = std::move(r).error_or("def");
+        EXPECT_EQ(v, "def");
+    }
+}
+
 TEST(ResultTests, ValueMatches)
 {
     using namespace ext;

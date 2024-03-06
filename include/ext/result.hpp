@@ -295,6 +295,42 @@ public:
     /// @return A reference to the contained error.
     constexpr auto error() const && -> const E&&;
 
+    /// Gets the value contained in the result if it exists, otherwise returns the specified default value.
+    /// @tparam U             The type of the default value.
+    /// @param  default_value Default value.
+    /// @return If the result is success - contained value, otherwise - specified default value.
+    template<typename U>
+        requires std::is_convertible_v<U&&, std::remove_reference_t<T>>
+              && std::is_copy_constructible_v<std::remove_reference_t<T>>
+    constexpr auto value_or(U&& default_value) const & -> std::remove_reference_t<T>;
+
+    /// Gets the value contained in the result if it exists, otherwise returns the specified default value.
+    /// @tparam U             The type of the default value.
+    /// @param  default_value Default value.
+    /// @return If the result is success - contained value, otherwise - specified default value.
+    template<typename U>
+        requires std::is_convertible_v<U&&, std::remove_reference_t<T>>
+              && std::is_move_constructible_v<std::remove_reference_t<T>>
+    constexpr auto value_or(U&& default_value) && -> std::remove_reference_t<T>;
+
+    /// Gets the error contained in the result if it exists, otherwise returns the specified default value.
+    /// @tparam U             The type of the default value.
+    /// @param  default_value Default value.
+    /// @return If the result is failure - contained error, otherwise - specified default value.
+    template<typename U>
+        requires std::is_convertible_v<U&&, E>
+              && std::is_copy_constructible_v<E>
+    constexpr auto error_or(U&& default_value) const & -> E;
+
+    /// Gets the error contained in the result if it exists, otherwise returns the specified default value.
+    /// @tparam U             The type of the default value.
+    /// @param  default_value Default value.
+    /// @return If the result is failure - contained error, otherwise - specified default value.
+    template<typename U>
+        requires std::is_convertible_v<U&&, E>
+              && std::is_move_constructible_v<E>
+    constexpr auto error_or(U&& default_value) && -> E;
+
     /// Checks whether the result is success.
     /// @return If result contains a value - true, otherwise - false.
     constexpr explicit operator bool() const noexcept;
@@ -774,6 +810,42 @@ constexpr auto result<T, E>::error() const && -> const E&&
         throw bad_result_access<E>();
     }
     return std::move(this->_error);
+}
+
+template<typename T, typename E>
+template<typename U>
+    requires std::is_convertible_v<U&&, std::remove_reference_t<T>>
+          && std::is_copy_constructible_v<std::remove_reference_t<T>>
+constexpr auto result<T, E>::value_or(U&& default_value) const & -> std::remove_reference_t<T>
+{
+    return *this ? value() : std::forward<U>(default_value);
+}
+
+template<typename T, typename E>
+template<typename U>
+    requires std::is_convertible_v<U&&, std::remove_reference_t<T>>
+          && std::is_move_constructible_v<std::remove_reference_t<T>>
+constexpr auto result<T, E>::value_or(U&& default_value) && -> std::remove_reference_t<T>
+{
+    return *this ? std::move(value()) : std::forward<U>(default_value);
+}
+
+template<typename T, typename E>
+template<typename U>
+    requires std::is_convertible_v<U&&, E>
+          && std::is_copy_constructible_v<E>
+constexpr auto result<T, E>::error_or(U&& default_value) const & -> E
+{
+    return !*this ? error() : std::forward<U>(default_value);
+}
+
+template<typename T, typename E>
+template<typename U>
+    requires std::is_convertible_v<U&&, E>
+          && std::is_move_constructible_v<E>
+constexpr auto result<T, E>::error_or(U&& default_value) && -> E
+{
+    return !*this ? std::move(error()) : std::forward<U>(default_value);
 }
 
 template<typename T, typename E>
